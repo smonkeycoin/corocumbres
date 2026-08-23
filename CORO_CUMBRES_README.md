@@ -2,6 +2,12 @@
 
 CORO CUMBRES es una biblioteca de canciones y Sets para coro de iglesia. Funciona local-first y no requiere internet una vez cargada.
 
+Producción V0.1: https://corocumbres.vercel.app
+
+Dominio final previsto: https://corocumbres.online
+
+Nota: el deploy en Vercel no agrega sincronización cloud. En V0.1, canciones, Sets y estado de presentación siguen guardándose en el `localStorage` de cada navegador.
+
 ## Modelo
 
 - `Library`: todas las canciones. Es la fuente de verdad de lyrics.
