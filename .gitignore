@@ -22,3 +22,5 @@ dist/
 
 # TypeScript incremental cache
 tsconfig.tsbuildinfo
+.vercel
+.env*

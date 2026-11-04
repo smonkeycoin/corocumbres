@@ -1,0 +1,16 @@
+{
+  "production": {
+    "critical": 0,
+    "high": 0,
+    "moderate": 0,
+    "low": 0
+  },
+  "development": {
+    "critical": 0,
+    "high": 0,
+    "moderate": 8,
+    "note": "Transitive minimatch via typescript-eslint; no force downgrade of Next eslint configuration applied."
+  },
+  "next": "16.4.5",
+  "verification": "npm audit --omit=dev, plus compatible npm audit fix"
+}

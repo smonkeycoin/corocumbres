@@ -1,5 +1,2 @@
-import { Dashboard } from "@/components/CoroApp";
-
-export default function Page() {
-  return <Dashboard />;
-}
+import { PublicHome } from "@/components/v2/PublicPortal";
+export default function Page() { return <PublicHome />; }

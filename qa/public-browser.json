@@ -1,0 +1,952 @@
+{
+  "baseURL": "http://127.0.0.1:3100",
+  "runAt": "2026-11-04T23:44:51.071Z",
+  "checks": [
+    {
+      "name": "chromium/iphone-small: mass contrast palette",
+      "passed": true,
+      "colors": [
+        {
+          "tone": "v2-mass-card v2-mass-children",
+          "color": "rgb(71, 52, 7)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-midday",
+          "color": "rgb(9, 37, 65)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-afternoon",
+          "color": "rgb(12, 63, 38)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-evening",
+          "color": "rgb(43, 23, 79)"
+        }
+      ]
+    },
+    {
+      "name": "chromium/iphone-small: home HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-small: exact four mass cards",
+      "passed": true,
+      "count": 4
+    },
+    {
+      "name": "chromium/iphone-small: no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 320,
+      "viewportWidth": 320
+    },
+    {
+      "name": "chromium/iphone-small: first mass visible without scrolling",
+      "passed": true,
+      "cardBottom": 414,
+      "viewportHeight": 568,
+      "heroHeight": 186
+    },
+    {
+      "name": "chromium/iphone-small: full cards are links",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-small: night time not invented",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-small: touch target height",
+      "passed": true,
+      "height": 87
+    },
+    {
+      "name": "chromium/iphone-small: children card navigation",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-small: playlist context",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-small: playlist no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 320,
+      "innerWidth": 320,
+      "songs": 2,
+      "empty": false
+    },
+    {
+      "name": "chromium/iphone-small: return to portal",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-small: login no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 320,
+      "viewportWidth": 320
+    },
+    {
+      "name": "chromium/iphone-small: Google unavailable state explicit",
+      "passed": true,
+      "googleDisabled": false
+    },
+    {
+      "name": "chromium/iphone-small: no environment details on login",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-modern: mass contrast palette",
+      "passed": true,
+      "colors": [
+        {
+          "tone": "v2-mass-card v2-mass-children",
+          "color": "rgb(71, 52, 7)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-midday",
+          "color": "rgb(9, 37, 65)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-afternoon",
+          "color": "rgb(12, 63, 38)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-evening",
+          "color": "rgb(43, 23, 79)"
+        }
+      ]
+    },
+    {
+      "name": "chromium/iphone-modern: home HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-modern: exact four mass cards",
+      "passed": true,
+      "count": 4
+    },
+    {
+      "name": "chromium/iphone-modern: no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 390,
+      "viewportWidth": 390
+    },
+    {
+      "name": "chromium/iphone-modern: first mass visible without scrolling",
+      "passed": true,
+      "cardBottom": 414,
+      "viewportHeight": 844,
+      "heroHeight": 186
+    },
+    {
+      "name": "chromium/iphone-modern: full cards are links",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-modern: night time not invented",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-modern: touch target height",
+      "passed": true,
+      "height": 87
+    },
+    {
+      "name": "chromium/iphone-modern: children card navigation",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-modern: playlist context",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-modern: playlist no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "songs": 2,
+      "empty": false
+    },
+    {
+      "name": "chromium/iphone-modern: return to portal",
+      "passed": true
+    },
+    {
+      "name": "chromium/iphone-modern: login no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 390,
+      "viewportWidth": 390
+    },
+    {
+      "name": "chromium/iphone-modern: Google unavailable state explicit",
+      "passed": true,
+      "googleDisabled": false
+    },
+    {
+      "name": "chromium/iphone-modern: no environment details on login",
+      "passed": true
+    },
+    {
+      "name": "chromium/android: mass contrast palette",
+      "passed": true,
+      "colors": [
+        {
+          "tone": "v2-mass-card v2-mass-children",
+          "color": "rgb(71, 52, 7)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-midday",
+          "color": "rgb(9, 37, 65)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-afternoon",
+          "color": "rgb(12, 63, 38)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-evening",
+          "color": "rgb(43, 23, 79)"
+        }
+      ]
+    },
+    {
+      "name": "chromium/android: home HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "chromium/android: exact four mass cards",
+      "passed": true,
+      "count": 4
+    },
+    {
+      "name": "chromium/android: no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 412,
+      "viewportWidth": 412
+    },
+    {
+      "name": "chromium/android: first mass visible without scrolling",
+      "passed": true,
+      "cardBottom": 414,
+      "viewportHeight": 915,
+      "heroHeight": 186
+    },
+    {
+      "name": "chromium/android: full cards are links",
+      "passed": true
+    },
+    {
+      "name": "chromium/android: night time not invented",
+      "passed": true
+    },
+    {
+      "name": "chromium/android: touch target height",
+      "passed": true,
+      "height": 87
+    },
+    {
+      "name": "chromium/android: children card navigation",
+      "passed": true
+    },
+    {
+      "name": "chromium/android: playlist context",
+      "passed": true
+    },
+    {
+      "name": "chromium/android: playlist no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 412,
+      "innerWidth": 412,
+      "songs": 2,
+      "empty": false
+    },
+    {
+      "name": "chromium/android: return to portal",
+      "passed": true
+    },
+    {
+      "name": "chromium/android: login no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 412,
+      "viewportWidth": 412
+    },
+    {
+      "name": "chromium/android: Google unavailable state explicit",
+      "passed": true,
+      "googleDisabled": false
+    },
+    {
+      "name": "chromium/android: no environment details on login",
+      "passed": true
+    },
+    {
+      "name": "chromium/tablet: mass contrast palette",
+      "passed": true,
+      "colors": [
+        {
+          "tone": "v2-mass-card v2-mass-children",
+          "color": "rgb(113, 73, 0)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-midday",
+          "color": "rgb(255, 255, 255)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-afternoon",
+          "color": "rgb(255, 255, 255)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-evening",
+          "color": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "name": "chromium/tablet: home HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "chromium/tablet: exact four mass cards",
+      "passed": true,
+      "count": 4
+    },
+    {
+      "name": "chromium/tablet: no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 768,
+      "viewportWidth": 768
+    },
+    {
+      "name": "chromium/tablet: first mass visible without scrolling",
+      "passed": true,
+      "cardBottom": 597.1875,
+      "viewportHeight": 1024,
+      "heroHeight": 270
+    },
+    {
+      "name": "chromium/tablet: full cards are links",
+      "passed": true
+    },
+    {
+      "name": "chromium/tablet: night time not invented",
+      "passed": true
+    },
+    {
+      "name": "chromium/tablet: touch target height",
+      "passed": true,
+      "height": 156
+    },
+    {
+      "name": "chromium/tablet: children card navigation",
+      "passed": true
+    },
+    {
+      "name": "chromium/tablet: playlist context",
+      "passed": true
+    },
+    {
+      "name": "chromium/tablet: playlist no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 768,
+      "innerWidth": 768,
+      "songs": 2,
+      "empty": false
+    },
+    {
+      "name": "chromium/tablet: return to portal",
+      "passed": true
+    },
+    {
+      "name": "chromium/tablet: login no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 768,
+      "viewportWidth": 768
+    },
+    {
+      "name": "chromium/tablet: Google unavailable state explicit",
+      "passed": true,
+      "googleDisabled": false
+    },
+    {
+      "name": "chromium/tablet: no environment details on login",
+      "passed": true
+    },
+    {
+      "name": "chromium/desktop: mass contrast palette",
+      "passed": true,
+      "colors": [
+        {
+          "tone": "v2-mass-card v2-mass-children",
+          "color": "rgb(113, 73, 0)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-midday",
+          "color": "rgb(255, 255, 255)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-afternoon",
+          "color": "rgb(255, 255, 255)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-evening",
+          "color": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "name": "chromium/desktop: home HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "chromium/desktop: exact four mass cards",
+      "passed": true,
+      "count": 4
+    },
+    {
+      "name": "chromium/desktop: no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440
+    },
+    {
+      "name": "chromium/desktop: first mass visible without scrolling",
+      "passed": true,
+      "cardBottom": 671.1875,
+      "viewportHeight": 1000,
+      "heroHeight": 320
+    },
+    {
+      "name": "chromium/desktop: full cards are links",
+      "passed": true
+    },
+    {
+      "name": "chromium/desktop: night time not invented",
+      "passed": true
+    },
+    {
+      "name": "chromium/desktop: touch target height",
+      "passed": true,
+      "height": 172
+    },
+    {
+      "name": "chromium/desktop: children card navigation",
+      "passed": true
+    },
+    {
+      "name": "chromium/desktop: playlist context",
+      "passed": true
+    },
+    {
+      "name": "chromium/desktop: playlist no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "songs": 2,
+      "empty": false
+    },
+    {
+      "name": "chromium/desktop: return to portal",
+      "passed": true
+    },
+    {
+      "name": "chromium/desktop: login no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440
+    },
+    {
+      "name": "chromium/desktop: Google unavailable state explicit",
+      "passed": true,
+      "googleDisabled": false
+    },
+    {
+      "name": "chromium/desktop: no environment details on login",
+      "passed": true
+    },
+    {
+      "name": "chromium: account denied message",
+      "passed": true
+    },
+    {
+      "name": "chromium: liturgical photograph available",
+      "passed": true,
+      "status": 200,
+      "contentType": "image/jpeg"
+    },
+    {
+      "name": "webkit/iphone-small: mass contrast palette",
+      "passed": true,
+      "colors": [
+        {
+          "tone": "v2-mass-card v2-mass-children",
+          "color": "rgb(71, 52, 7)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-midday",
+          "color": "rgb(9, 37, 65)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-afternoon",
+          "color": "rgb(12, 63, 38)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-evening",
+          "color": "rgb(43, 23, 79)"
+        }
+      ]
+    },
+    {
+      "name": "webkit/iphone-small: home HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-small: exact four mass cards",
+      "passed": true,
+      "count": 4
+    },
+    {
+      "name": "webkit/iphone-small: no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 320,
+      "viewportWidth": 320
+    },
+    {
+      "name": "webkit/iphone-small: first mass visible without scrolling",
+      "passed": true,
+      "cardBottom": 414,
+      "viewportHeight": 568,
+      "heroHeight": 186
+    },
+    {
+      "name": "webkit/iphone-small: full cards are links",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-small: night time not invented",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-small: touch target height",
+      "passed": true,
+      "height": 87
+    },
+    {
+      "name": "webkit/iphone-small: children card navigation",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-small: playlist context",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-small: playlist no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 320,
+      "innerWidth": 320,
+      "songs": 2,
+      "empty": false
+    },
+    {
+      "name": "webkit/iphone-small: return to portal",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-small: login no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 320,
+      "viewportWidth": 320
+    },
+    {
+      "name": "webkit/iphone-small: Google unavailable state explicit",
+      "passed": true,
+      "googleDisabled": false
+    },
+    {
+      "name": "webkit/iphone-small: no environment details on login",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-modern: mass contrast palette",
+      "passed": true,
+      "colors": [
+        {
+          "tone": "v2-mass-card v2-mass-children",
+          "color": "rgb(71, 52, 7)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-midday",
+          "color": "rgb(9, 37, 65)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-afternoon",
+          "color": "rgb(12, 63, 38)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-evening",
+          "color": "rgb(43, 23, 79)"
+        }
+      ]
+    },
+    {
+      "name": "webkit/iphone-modern: home HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-modern: exact four mass cards",
+      "passed": true,
+      "count": 4
+    },
+    {
+      "name": "webkit/iphone-modern: no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 390,
+      "viewportWidth": 390
+    },
+    {
+      "name": "webkit/iphone-modern: first mass visible without scrolling",
+      "passed": true,
+      "cardBottom": 414,
+      "viewportHeight": 844,
+      "heroHeight": 186
+    },
+    {
+      "name": "webkit/iphone-modern: full cards are links",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-modern: night time not invented",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-modern: touch target height",
+      "passed": true,
+      "height": 87
+    },
+    {
+      "name": "webkit/iphone-modern: children card navigation",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-modern: playlist context",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-modern: playlist no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "songs": 2,
+      "empty": false
+    },
+    {
+      "name": "webkit/iphone-modern: return to portal",
+      "passed": true
+    },
+    {
+      "name": "webkit/iphone-modern: login no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 390,
+      "viewportWidth": 390
+    },
+    {
+      "name": "webkit/iphone-modern: Google unavailable state explicit",
+      "passed": true,
+      "googleDisabled": false
+    },
+    {
+      "name": "webkit/iphone-modern: no environment details on login",
+      "passed": true
+    },
+    {
+      "name": "webkit/android: mass contrast palette",
+      "passed": true,
+      "colors": [
+        {
+          "tone": "v2-mass-card v2-mass-children",
+          "color": "rgb(71, 52, 7)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-midday",
+          "color": "rgb(9, 37, 65)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-afternoon",
+          "color": "rgb(12, 63, 38)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-evening",
+          "color": "rgb(43, 23, 79)"
+        }
+      ]
+    },
+    {
+      "name": "webkit/android: home HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "webkit/android: exact four mass cards",
+      "passed": true,
+      "count": 4
+    },
+    {
+      "name": "webkit/android: no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 412,
+      "viewportWidth": 412
+    },
+    {
+      "name": "webkit/android: first mass visible without scrolling",
+      "passed": true,
+      "cardBottom": 414,
+      "viewportHeight": 915,
+      "heroHeight": 186
+    },
+    {
+      "name": "webkit/android: full cards are links",
+      "passed": true
+    },
+    {
+      "name": "webkit/android: night time not invented",
+      "passed": true
+    },
+    {
+      "name": "webkit/android: touch target height",
+      "passed": true,
+      "height": 87
+    },
+    {
+      "name": "webkit/android: children card navigation",
+      "passed": true
+    },
+    {
+      "name": "webkit/android: playlist context",
+      "passed": true
+    },
+    {
+      "name": "webkit/android: playlist no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 412,
+      "innerWidth": 412,
+      "songs": 2,
+      "empty": false
+    },
+    {
+      "name": "webkit/android: return to portal",
+      "passed": true
+    },
+    {
+      "name": "webkit/android: login no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 412,
+      "viewportWidth": 412
+    },
+    {
+      "name": "webkit/android: Google unavailable state explicit",
+      "passed": true,
+      "googleDisabled": false
+    },
+    {
+      "name": "webkit/android: no environment details on login",
+      "passed": true
+    },
+    {
+      "name": "webkit/tablet: mass contrast palette",
+      "passed": true,
+      "colors": [
+        {
+          "tone": "v2-mass-card v2-mass-children",
+          "color": "rgb(113, 73, 0)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-midday",
+          "color": "rgb(255, 255, 255)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-afternoon",
+          "color": "rgb(255, 255, 255)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-evening",
+          "color": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "name": "webkit/tablet: home HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "webkit/tablet: exact four mass cards",
+      "passed": true,
+      "count": 4
+    },
+    {
+      "name": "webkit/tablet: no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 768,
+      "viewportWidth": 768
+    },
+    {
+      "name": "webkit/tablet: first mass visible without scrolling",
+      "passed": true,
+      "cardBottom": 597.1875,
+      "viewportHeight": 1024,
+      "heroHeight": 270
+    },
+    {
+      "name": "webkit/tablet: full cards are links",
+      "passed": true
+    },
+    {
+      "name": "webkit/tablet: night time not invented",
+      "passed": true
+    },
+    {
+      "name": "webkit/tablet: touch target height",
+      "passed": true,
+      "height": 156
+    },
+    {
+      "name": "webkit/tablet: children card navigation",
+      "passed": true
+    },
+    {
+      "name": "webkit/tablet: playlist context",
+      "passed": true
+    },
+    {
+      "name": "webkit/tablet: playlist no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 768,
+      "innerWidth": 768,
+      "songs": 2,
+      "empty": false
+    },
+    {
+      "name": "webkit/tablet: return to portal",
+      "passed": true
+    },
+    {
+      "name": "webkit/tablet: login no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 768,
+      "viewportWidth": 768
+    },
+    {
+      "name": "webkit/tablet: Google unavailable state explicit",
+      "passed": true,
+      "googleDisabled": false
+    },
+    {
+      "name": "webkit/tablet: no environment details on login",
+      "passed": true
+    },
+    {
+      "name": "webkit/desktop: mass contrast palette",
+      "passed": true,
+      "colors": [
+        {
+          "tone": "v2-mass-card v2-mass-children",
+          "color": "rgb(113, 73, 0)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-midday",
+          "color": "rgb(255, 255, 255)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-afternoon",
+          "color": "rgb(255, 255, 255)"
+        },
+        {
+          "tone": "v2-mass-card v2-mass-evening",
+          "color": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "name": "webkit/desktop: home HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "webkit/desktop: exact four mass cards",
+      "passed": true,
+      "count": 4
+    },
+    {
+      "name": "webkit/desktop: no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440
+    },
+    {
+      "name": "webkit/desktop: first mass visible without scrolling",
+      "passed": true,
+      "cardBottom": 671.1875,
+      "viewportHeight": 1000,
+      "heroHeight": 320
+    },
+    {
+      "name": "webkit/desktop: full cards are links",
+      "passed": true
+    },
+    {
+      "name": "webkit/desktop: night time not invented",
+      "passed": true
+    },
+    {
+      "name": "webkit/desktop: touch target height",
+      "passed": true,
+      "height": 172
+    },
+    {
+      "name": "webkit/desktop: children card navigation",
+      "passed": true
+    },
+    {
+      "name": "webkit/desktop: playlist context",
+      "passed": true
+    },
+    {
+      "name": "webkit/desktop: playlist no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "songs": 2,
+      "empty": false
+    },
+    {
+      "name": "webkit/desktop: return to portal",
+      "passed": true
+    },
+    {
+      "name": "webkit/desktop: login no horizontal overflow",
+      "passed": true,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440
+    },
+    {
+      "name": "webkit/desktop: Google unavailable state explicit",
+      "passed": true,
+      "googleDisabled": false
+    },
+    {
+      "name": "webkit/desktop: no environment details on login",
+      "passed": true
+    },
+    {
+      "name": "webkit: account denied message",
+      "passed": true
+    },
+    {
+      "name": "webkit: liturgical photograph available",
+      "passed": true,
+      "status": 200,
+      "contentType": "image/jpeg"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "summary": {
+    "passed": 154,
+    "failed": 0
+  }
+}

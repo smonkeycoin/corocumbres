@@ -1,7 +1,8 @@
 "use client";
 
-import { createSet, makeFreeSection, makeSetItem } from "./liturgy";
-import { seedSongs } from "./seed-songs";
+import { createSet, ensureSetStructure, makeFreeSection, makeSetItem } from "./liturgy";
+// Repertoire seeds live exclusively on the server. Local storage remains a migration source.
+const seedSongs: Song[] = [];
 import { CoroSet, Preferences, PresenterState, Song } from "./types";
 
 export const storageKeys = {
@@ -45,6 +46,7 @@ export const defaultPresenterState: PresenterState = {
   fullLyrics: "",
   songIndex: 0,
   black: false,
+  isBlackout: false,
   theme: "blue",
   showChords: false,
   fontScale: 1
@@ -77,7 +79,7 @@ function normalizeTheme(theme: unknown): "blue" | "black" {
 function normalizePrefs(value: Preferences): Preferences {
   return {
     schemaVersion: 1,
-    fontScale: Number.isFinite(value.fontScale) ? value.fontScale : defaultPrefs.fontScale,
+    fontScale: Number.isFinite(value.fontScale) ? Math.min(1, Math.max(0.5, value.fontScale)) : defaultPrefs.fontScale,
     theme: normalizeTheme(value.theme),
     showChords: value.showChords ?? false
   };
@@ -86,8 +88,10 @@ function normalizePrefs(value: Preferences): Preferences {
 function normalizePresenterState(value: PresenterState): PresenterState {
   return {
     ...value,
+    isBlackout: value.isBlackout ?? value.black ?? false,
+    black: value.isBlackout ?? value.black ?? false,
     theme: normalizeTheme(value.theme),
-    fontScale: Number.isFinite(value.fontScale) ? value.fontScale : defaultPresenterState.fontScale,
+    fontScale: Number.isFinite(value.fontScale) ? Math.min(1, Math.max(0.5, value.fontScale)) : defaultPresenterState.fontScale,
     showChords: value.showChords ?? false
   };
 }
@@ -122,11 +126,19 @@ function recoverSeedChordData(songs: Song[]) {
   return { songs: recovered, changed };
 }
 
+function addMissingSeedSongs(songs: Song[]) {
+  const existingIds = new Set(songs.map((song) => song.id));
+  const existingTitles = new Set(songs.map((song) => slugTitle(song.title)));
+  const missing = seedSongs.filter((song) => !existingIds.has(song.id) && !existingTitles.has(slugTitle(song.title)));
+  return missing.length ? { songs: [...songs, ...missing], changed: true } : { songs, changed: false };
+}
+
 export function loadLibrary() {
   const songs = readJsonWithLegacy<Song[]>(storageKeys.library, legacyKeys.library, seedSongs);
   const recovered = recoverSeedChordData(songs);
-  if (recovered.changed) localStorage.setItem(storageKeys.library, JSON.stringify(recovered.songs));
-  return recovered.songs;
+  const merged = addMissingSeedSongs(recovered.songs);
+  if (recovered.changed || merged.changed) localStorage.setItem(storageKeys.library, JSON.stringify(merged.songs));
+  return merged.songs;
 }
 
 export function saveLibrary(songs: Song[]) {
@@ -182,11 +194,12 @@ export function loadSets() {
 
 function ensureDefaultSetTypes(sets: CoroSet[]) {
   const additions: CoroSet[] = [];
-  if (!sets.some((set) => set.type === "playlist")) additions.push(createSet("playlist", "Playlist"));
-  if (!sets.some((set) => set.type === "mass")) additions.push(createSet("mass", "Nueva Misa"));
-  if (!sets.some((set) => set.type === "sunday_mass")) additions.push(createSet("sunday_mass", "Nueva Misa Dominical"));
-  const next = additions.length ? [...sets, ...additions] : sets;
-  if (additions.length) localStorage.setItem(storageKeys.sets, JSON.stringify(next));
+  const structured = sets.map(ensureSetStructure);
+  if (!structured.some((set) => set.type === "playlist")) additions.push(createSet("playlist", "Playlist"));
+  if (!structured.some((set) => set.type === "mass")) additions.push(createSet("mass", "Nueva Misa"));
+  if (!structured.some((set) => set.type === "sunday_mass")) additions.push(createSet("sunday_mass", "Nueva Misa Dominical"));
+  const next = additions.length ? [...structured, ...additions] : structured;
+  if (additions.length || JSON.stringify(structured) !== JSON.stringify(sets)) localStorage.setItem(storageKeys.sets, JSON.stringify(next));
   return next;
 }
 

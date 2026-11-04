@@ -13,7 +13,7 @@ export const liturgicalMoments: Array<{ id: LiturgicalMoment; label: string; sho
   { id: "amen", label: "AMÉN", short: "Amén" },
   { id: "our_father", label: "PADRE NUESTRO", short: "Padre Nuestro" },
   { id: "peace", label: "PAZ", short: "Paz" },
-  { id: "agnus_dei", label: "CORDERO DE DIOS", short: "Cordero" },
+  { id: "agnus_dei", label: "CORDERO", short: "Cordero" },
   { id: "communion", label: "COMUNIÓN", short: "Comunión" },
   { id: "thanksgiving", label: "ACCIÓN DE GRACIAS", short: "Acción de Gracias" },
   { id: "recessional", label: "SALIDA", short: "Salida" }
@@ -71,6 +71,23 @@ export function makeLiturgicalSections() {
     isEnabled: true,
     items: []
   }));
+}
+
+export function ensureSetStructure(set: CoroSet): CoroSet {
+  if (set.type === "playlist") {
+    return set.sections.length ? set : { ...set, sections: [makeFreeSection()] };
+  }
+
+  const existingByType = new Map(set.sections.map((section) => [section.type, section]));
+  return {
+    ...set,
+    sections: liturgicalMoments.map((moment, position) => {
+      const existing = existingByType.get(moment.id);
+      return existing
+        ? { ...existing, label: existing.label || moment.label, position, isEnabled: existing.isEnabled ?? true, items: sortItems(existing.items) }
+        : { id: uid("section"), type: moment.id, label: moment.label, position, isEnabled: true, items: [] };
+    })
+  };
 }
 
 export function setTypeLabel(type: SetType) {

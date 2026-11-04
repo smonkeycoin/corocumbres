@@ -1,14 +1,15 @@
 "use client";
 
-import { ChangeEvent, CSSProperties, DragEvent, MouseEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, CSSProperties, DragEvent, forwardRef, MouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { flattenSetItems, libraryFilters, liturgicalMoments, createSet, makeSetItem, normalizeItems, setTypeLabel, sortItems, sortSections } from "@/lib/liturgy";
+import { ensureSetStructure, flattenSetItems, libraryFilters, liturgicalMoments, createSet, makeSetItem, normalizeItems, setTypeLabel, sortItems, sortSections } from "@/lib/liturgy";
 import { makeSong, sectionLines, sectionsToText, songToFullLyrics, textToSections } from "@/lib/song-format";
 import { loadLibrary, loadPrefs, loadSets, saveLibrary, savePrefs, saveSets, validateImport, validateSetImport } from "@/lib/storage";
 import { publishPresenterState } from "@/lib/presenter-channel";
 import { CoroSet, LiturgicalMoment, SetItem, SetSection, SetType, Song } from "@/lib/types";
 
 type MainView = "sets" | "library";
+type PendingAddTarget = string | "choose" | null;
 
 function nowIso() {
   return new Date().toISOString();
@@ -95,8 +96,11 @@ export function Dashboard() {
   const [dragItemId, setDragItemId] = useState<string | null>(null);
   const [dragSongId, setDragSongId] = useState<string | null>(null);
   const [hotSectionId, setHotSectionId] = useState<string | null>(null);
+  const [pendingAddSectionId, setPendingAddSectionId] = useState<PendingAddTarget>(null);
+  const [libraryFocusPulse, setLibraryFocusPulse] = useState(0);
   const libraryFileRef = useRef<HTMLInputElement>(null);
   const setFileRef = useRef<HTMLInputElement>(null);
+  const libraryPaneRef = useRef<HTMLElement>(null);
 
   const visibleSets = useMemo(() => sets.filter((set) => !set.isArchived).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()), [sets]);
   const activeSet = sets.find((set) => set.id === openSetId) ?? visibleSets[0] ?? null;
@@ -104,11 +108,12 @@ export function Dashboard() {
 
   useEffect(() => {
     const requestedSetId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("set") : null;
+    if (openSetId && visibleSets.some((set) => set.id === openSetId)) return;
     if (requestedSetId && visibleSets.some((set) => set.id === requestedSetId)) {
       setOpenSetId(requestedSetId);
       return;
     }
-    if (!openSetId && visibleSets[0]) setOpenSetId(visibleSets[0].id);
+    if (visibleSets[0]) setOpenSetId(visibleSets[0].id);
   }, [openSetId, visibleSets]);
 
   useEffect(() => {
@@ -128,6 +133,63 @@ export function Dashboard() {
 
   function updateSet(id: string, updater: (set: CoroSet) => CoroSet) {
     setSets((current) => current.map((set) => (set.id === id ? updater(set) : set)));
+  }
+
+  function focusLibrary(sectionId: PendingAddTarget = null) {
+    setPendingAddSectionId(sectionId);
+    setView("sets");
+    setMomentFilter("all");
+    setLibraryFocusPulse((value) => value + 1);
+    window.setTimeout(() => libraryPaneRef.current?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }), 0);
+  }
+
+  function selectSet(id: string) {
+    setOpenSetId(id);
+    setPendingAddSectionId(null);
+    setView("sets");
+    router.replace(`/?set=${encodeURIComponent(id)}`, { scroll: false });
+  }
+
+  function chooseSectionForSong(set: CoroSet) {
+    const sections = sortSections(set.sections).filter((section) => section.isEnabled !== false);
+    if (set.type === "playlist") return sections[0] ?? null;
+    const options = sections
+      .map((section) => {
+        const moment = liturgicalMoments.find((item) => item.id === section.type);
+        return moment?.short ?? section.label;
+      })
+      .join(", ");
+    const answer = window.prompt(`Elegir momento litúrgico:\n${options}`);
+    if (!answer) return null;
+    const normalized = answer.trim().toLowerCase();
+    return (
+      sections.find((section) => {
+        const moment = liturgicalMoments.find((item) => item.id === section.type);
+        return (
+          section.label.toLowerCase() === normalized ||
+          section.type.toLowerCase() === normalized ||
+          moment?.short.toLowerCase() === normalized ||
+          moment?.label.toLowerCase() === normalized
+        );
+      }) ?? null
+    );
+  }
+
+  function addSongFromLibrary(songId: string) {
+    if (!activeSet) return;
+    const sections = sortSections(activeSet.sections).filter((section) => section.isEnabled !== false);
+    const target =
+      pendingAddSectionId && pendingAddSectionId !== "choose"
+        ? sections.find((section) => section.id === pendingAddSectionId) ?? null
+        : pendingAddSectionId === "choose"
+          ? chooseSectionForSong(activeSet)
+          : activeSet.type === "playlist"
+            ? sections[0] ?? null
+            : chooseSectionForSong(activeSet);
+    if (!target) return;
+    addSongToSection(activeSet.id, target.id, songId);
+    setSelectedSongId(songId);
+    if (pendingAddSectionId === "choose") setPendingAddSectionId(null);
   }
 
   function addSet(type: SetType) {
@@ -237,6 +299,10 @@ export function Dashboard() {
 
   function presentSet(set: CoroSet) {
     const flat = flattenSetItems(set);
+    if (!flat.length) {
+      alert("Agrega al menos una canción para presentar.");
+      return;
+    }
     const first = flat[0] ?? null;
     const firstSong = songs.find((song) => song.id === first?.item.songId) ?? null;
     const prefs = loadPrefs();
@@ -294,7 +360,7 @@ export function Dashboard() {
     try {
       const parsed = JSON.parse(await file.text()) as { set?: unknown; songs?: unknown };
       if (!validateSetImport(parsed.set)) throw new Error("Invalid set");
-      const importedSet = parsed.set;
+      const importedSet = ensureSetStructure(parsed.set);
       setSets([importedSet, ...sets.filter((set) => set.id !== importedSet.id)]);
       if (validateImport(parsed.songs)) setSongs([...parsed.songs.filter((song) => !songs.some((existing) => existing.id === song.id)), ...songs]);
       setOpenSetId(importedSet.id);
@@ -307,6 +373,8 @@ export function Dashboard() {
 
   if (!ready) return <main className="app-shell">Cargando CORO CUMBRES...</main>;
 
+  const activeSetSongCount = activeSet ? flattenSetItems(activeSet).length : 0;
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -314,11 +382,11 @@ export function Dashboard() {
         <nav className="nav-tabs">
           <button className={view === "library" ? "active-tab" : ""} onClick={() => setView("library")}>Biblioteca</button>
           <button className={view === "sets" ? "active-tab" : ""} onClick={() => setView("sets")}>Sets</button>
-          <button disabled={!activeSet} onClick={() => activeSet && presentSet(activeSet)}>Presentar</button>
+          <button disabled={!activeSet || activeSetSongCount === 0} onClick={() => activeSet && presentSet(activeSet)}>Presentar</button>
         </nav>
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por titulo o letra" />
         <button onClick={() => window.open("/display", "_blank")}>Display</button>
-        <button className="primary" disabled={!activeSet} onClick={() => activeSet && presentSet(activeSet)}>Presentar</button>
+        <button className="primary" disabled={!activeSet || activeSetSongCount === 0} onClick={() => activeSet && presentSet(activeSet)}>Presentar</button>
       </header>
 
       {view === "sets" ? (
@@ -332,7 +400,7 @@ export function Dashboard() {
             setRenamingId={setRenamingId}
             renameSet={renameSet}
             addSet={addSet}
-            openSet={setOpenSetId}
+            openSet={selectSet}
           />
           {activeSet ? (
             <SetWorkspace
@@ -353,9 +421,11 @@ export function Dashboard() {
               exportSet={exportSet}
               duplicateSet={duplicateSet}
               archiveSet={archiveSet}
+              requestAddSong={focusLibrary}
             />
           ) : null}
           <LibraryPane
+            ref={libraryPaneRef}
             songs={filteredSongs}
             query={query}
             setQuery={setQuery}
@@ -364,7 +434,9 @@ export function Dashboard() {
             selectedSong={selectedSong}
             setSelectedSongId={setSelectedSongId}
             activeSet={activeSet}
-            addSongToSection={addSongToSection}
+            pendingAddSectionId={pendingAddSectionId}
+            focusPulse={libraryFocusPulse}
+            addSongFromLibrary={addSongFromLibrary}
             setDragSongId={setDragSongId}
             setView={setView}
           />
@@ -387,7 +459,7 @@ export function Dashboard() {
               <input ref={setFileRef} type="file" accept="application/json" hidden onChange={importSet} />
             </div>
             <LibraryFilters value={momentFilter} onChange={setMomentFilter} />
-            <SongList songs={filteredSongs} selectedId={selectedSong?.id ?? null} onSelect={setSelectedSongId} onAdd={(id) => activeSet && addSongToSection(activeSet.id, activeSet.sections[0].id, id)} onMouseDragStart={setDragSongId} />
+            <SongList songs={filteredSongs} selectedId={selectedSong?.id ?? null} onSelect={setSelectedSongId} onAdd={addSongFromLibrary} onMouseDragStart={setDragSongId} />
           </aside>
           <SongWorkspace
             song={selectedSong}
@@ -461,12 +533,15 @@ function SetSidebar(props: {
                     }}
                   />
                 ) : (
-                  <button className="set-row-main" onClick={() => props.openSet(set.id)}>
+                  <button type="button" className="set-row-main" onClick={() => props.openSet(set.id)}>
                     <span>{set.name}</span>
                     <small>{flattenSetItems(set).length} canciones</small>
                   </button>
                 )}
-                <button className="icon-menu-button" title="Renombrar" onClick={() => props.setRenamingId(set.id)}>•••</button>
+                <button className="icon-menu-button" title="Renombrar" onClick={(event) => {
+                  event.stopPropagation();
+                  props.setRenamingId(set.id);
+                }}>•••</button>
               </div>
             ))}
           </div>
@@ -476,7 +551,7 @@ function SetSidebar(props: {
   );
 }
 
-function LibraryPane(props: {
+const LibraryPane = forwardRef<HTMLElement, {
   songs: Song[];
   query: string;
   setQuery: (value: string) => void;
@@ -485,33 +560,49 @@ function LibraryPane(props: {
   selectedSong: Song | null;
   setSelectedSongId: (id: string) => void;
   activeSet: CoroSet | null;
-  addSongToSection: (setId: string, sectionId: string, songId: string) => void;
+  pendingAddSectionId: PendingAddTarget;
+  focusPulse: number;
+  addSongFromLibrary: (songId: string) => void;
   setDragSongId: (id: string | null) => void;
   setView: (view: MainView) => void;
-}) {
-  const firstSection = sortSections(props.activeSet?.sections ?? []).find((section) => section.isEnabled !== false);
+}>(
+function LibraryPane(props, ref) {
+  const searchRef = useRef<HTMLInputElement>(null);
+  const targetSection =
+    props.pendingAddSectionId && props.pendingAddSectionId !== "choose"
+      ? sortSections(props.activeSet?.sections ?? []).find((section) => section.id === props.pendingAddSectionId)
+      : null;
+
+  useEffect(() => {
+    if (!props.focusPulse) return;
+    searchRef.current?.focus();
+    searchRef.current?.select();
+  }, [props.focusPulse]);
 
   return (
-    <aside className="library-pane">
+    <aside className={`library-pane ${props.focusPulse ? "library-pane-focus" : ""}`} ref={ref}>
       <div className="pane-title-row">
         <h2>Biblioteca</h2>
         <button className="compact-button" onClick={() => props.setView("library")}>Editar</button>
       </div>
-      <input value={props.query} onChange={(event) => props.setQuery(event.target.value)} placeholder="Buscar canción" />
+      {props.activeSet ? (
+        <div className="library-add-context">
+          {targetSection ? `Agregar a ${targetSection.label}` : props.activeSet.type === "playlist" ? "Agregar al final de la playlist" : "Elige una canción y selecciona el momento"}
+        </div>
+      ) : null}
+      <input ref={searchRef} value={props.query} onChange={(event) => props.setQuery(event.target.value)} placeholder="Buscar canción" />
       <LibraryFilters value={props.momentFilter} onChange={props.setMomentFilter} />
       <SongList
         songs={props.songs}
         selectedId={props.selectedSong?.id ?? null}
         onSelect={props.setSelectedSongId}
-        onAdd={(id) => {
-          if (props.activeSet && firstSection) props.addSongToSection(props.activeSet.id, firstSection.id, id);
-        }}
+        onAdd={props.addSongFromLibrary}
         onMouseDragStart={props.setDragSongId}
         draggable
       />
     </aside>
   );
-}
+});
 
 function SetWorkspace(props: {
   set: CoroSet;
@@ -531,17 +622,26 @@ function SetWorkspace(props: {
   exportSet: (set: CoroSet) => void;
   duplicateSet: (id: string) => void;
   archiveSet: (id: string) => void;
+  requestAddSong: (sectionId?: PendingAddTarget) => void;
 }) {
   const sections = sortSections(props.set.sections).filter((section) => section.isEnabled !== false);
+  const songCount = flattenSetItems(props.set).length;
+  const emptyCopy =
+    props.set.type === "playlist"
+      ? "Todavía no hay canciones en esta playlist."
+      : props.set.type === "mass"
+        ? "Esta Misa todavía no tiene canciones."
+        : "Esta Misa Dominical todavía no tiene canciones.";
 
   return (
       <section className="set-workspace-panel">
         <div className="workspace-header">
           <div>
             <h2>{props.set.name}</h2>
-            <p className="muted">{setTypeLabel(props.set.type)} · {flattenSetItems(props.set).length} canciones · {relativeDate(props.set.updatedAt)}</p>
+            <p className="muted">{setTypeLabel(props.set.type)} · {songCount} canciones · {relativeDate(props.set.updatedAt)}</p>
           </div>
           <div className="actions">
+            <button className="accent" onClick={() => props.requestAddSong(props.set.type === "playlist" ? sections[0]?.id ?? null : "choose")}>+ Canción</button>
             <button onClick={() => props.exportSet(props.set)}>Compartir</button>
             <button onClick={() => props.duplicateSet(props.set.id)}>Duplicar</button>
             <details className="workspace-actions-menu">
@@ -553,9 +653,15 @@ function SetWorkspace(props: {
                 }}>Archivar</button>
               </div>
             </details>
-            <button className="primary" onClick={() => props.presentSet(props.set)}>Presentar</button>
+            <button className="primary" disabled={songCount === 0} title={songCount === 0 ? "Agrega al menos una canción para presentar." : undefined} onClick={() => props.presentSet(props.set)}>Presentar</button>
           </div>
         </div>
+        {songCount === 0 ? (
+          <div className="empty-set-callout">
+            <strong>{emptyCopy}</strong>
+            <button className="primary" onClick={() => props.requestAddSong(props.set.type === "playlist" ? sections[0]?.id ?? null : "choose")}>+ Agregar canción</button>
+          </div>
+        ) : null}
         <div className={props.set.type === "playlist" ? "set-free-list" : "mass-sections"}>
           {sections.map((section) => (
             <SetSectionView
@@ -574,6 +680,7 @@ function SetWorkspace(props: {
               moveItem={props.moveItem}
               reorderItem={props.reorderItem}
               setSelectedSongId={props.setSelectedSongId}
+              requestAddSong={props.requestAddSong}
             />
           ))}
         </div>
@@ -596,6 +703,7 @@ function SetSectionView(props: {
   moveItem: (setId: string, sectionId: string, itemId: string, direction: -1 | 1) => void;
   reorderItem: (setId: string, sectionId: string, draggedId: string, targetId: string) => void;
   setSelectedSongId: (id: string) => void;
+  requestAddSong: (sectionId?: PendingAddTarget) => void;
 }) {
   const liveDragItemId = useRef<string | null>(null);
   const items = sortItems(props.section.items);
@@ -686,7 +794,15 @@ function SetSectionView(props: {
             </div>
           );
         })}
-        {!items.length ? <div className="section-drop-hint">Suelta canciones aquí</div> : null}
+        {!items.length ? (
+          <div className="section-drop-hint">
+            <span>{props.set.type === "playlist" ? "Esta playlist está vacía." : "Suelta canciones aquí"}</span>
+            <button className="compact-button" onClick={(event) => {
+              event.stopPropagation();
+              props.requestAddSong(props.section.id);
+            }}>+ Agregar canción</button>
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -813,7 +929,7 @@ function SongWorkspace(props: {
   );
 }
 
-function LibrarySongRender({ song, showChords }: { song: Song; showChords: boolean }) {
+export function LibrarySongRender({ song, showChords }: { song: Song; showChords: boolean }) {
   if (!showChords) {
     return <pre className="library-lyrics-only">{songToFullLyrics(song)}</pre>;
   }
@@ -851,7 +967,7 @@ function renderChordRow(lyrics: string, chords: Array<{ symbol: string; position
   return chars.join("").trimEnd();
 }
 
-function SongEditor({ song, onSave, onCancel }: { song: Song; onSave: (song: Song) => void; onCancel: () => void }) {
+export function SongEditor({ song, onSave, onCancel }: { song: Song; onSave: (song: Song) => void; onCancel: () => void }) {
   const [title, setTitle] = useState(song.title);
   const [lyrics, setLyrics] = useState(sectionsToText(song.sections));
   const [moments, setMoments] = useState<LiturgicalMoment[]>(song.liturgicalMoments ?? []);
@@ -862,7 +978,7 @@ function SongEditor({ song, onSave, onCancel }: { song: Song; onSave: (song: Son
 
   return (
     <div className="editor song-editor-full">
-      <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Titulo" />
+      <label className="editor-field">Título<input aria-label="Título de la canción" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Título" /></label>
       <div>
         <p className="muted">Momento de la Misa</p>
         <div className="filter-chips">
@@ -873,7 +989,7 @@ function SongEditor({ song, onSave, onCancel }: { song: Song; onSave: (song: Son
           ))}
         </div>
       </div>
-      <textarea value={lyrics} onChange={(event) => setLyrics(event.target.value)} />
+      <label className="editor-field">Letra y acordes<textarea aria-label="Letra y acordes" value={lyrics} onChange={(event) => setLyrics(event.target.value)} /></label>
       <div className="actions">
         <button onClick={() => setLyrics(sectionsToText(textToSections(lyrics)))}>Auto Format</button>
         <button className="primary" onClick={() => onSave({ ...song, title: title.trim() || "Sin titulo", liturgicalMoments: moments, sections: textToSections(lyrics), updatedAt: nowIso() })}>Guardar</button>

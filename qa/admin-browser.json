@@ -1,0 +1,104 @@
+{
+  "baseURL": "http://127.0.0.1:3100",
+  "startedAt": "2026-11-04T23:44:00.125Z",
+  "authentication": "Offline signed NextAuth fixture sessions with Google claims; no live Google OAuth login was performed.",
+  "scope": "Isolated local QA data; no production data was changed.",
+  "tests": [
+    {
+      "name": "B: anonymous cannot read or write the repertoire or directly enter admin",
+      "status": "PASS",
+      "durationMs": 2261
+    },
+    {
+      "name": "C: signed Google identity outside allowlist is denied; client role claims cannot grant admin",
+      "status": "PASS",
+      "durationMs": 1061,
+      "details": {
+        "liveGoogleOAuth": "NOT EXECUTED",
+        "authorizationWithSignedFixtures": "PASS"
+      }
+    },
+    {
+      "name": "Authorized dashboard and server origin protection",
+      "status": "PASS",
+      "durationMs": 505,
+      "details": {
+        "historicalSongs": 26
+      }
+    },
+    {
+      "name": "Admin creates a children mass playlist with two historical songs through UI and saves a private draft",
+      "status": "PASS",
+      "durationMs": 701
+    },
+    {
+      "name": "Admin reorders with accessible controls and drag-and-drop, then publishes",
+      "status": "PASS",
+      "durationMs": 258
+    },
+    {
+      "name": "D: an independent anonymous browser sees the same published playlist",
+      "status": "PASS",
+      "durationMs": 1199
+    },
+    {
+      "name": "A: mobile anonymous home → children mass → lyrics → next → previous → playlist; font adjustment",
+      "status": "PASS",
+      "durationMs": 2605,
+      "details": {
+        "interactionsToFirstLyrics": 2,
+        "viewport": "390×844"
+      }
+    },
+    {
+      "name": "Removing a playlist item preserves repertoire; saved draft stays private until published",
+      "status": "PASS",
+      "durationMs": 457
+    },
+    {
+      "name": "Public API projects only published songs and unknown/unpublished lyric routes return 404",
+      "status": "PASS",
+      "durationMs": 107
+    },
+    {
+      "name": "Repertoire creates and edits a QA-only song through UI; a new admin page reads saved changes",
+      "status": "PASS",
+      "durationMs": 1305
+    },
+    {
+      "name": "Presenter and Display retain song navigation, live synchronization and blackout",
+      "status": "PASS",
+      "durationMs": 666
+    },
+    {
+      "name": "Admin and repertoire layouts have no horizontal overflow on small iPhone, modern iPhone, Android, tablet and desktop",
+      "status": "PASS",
+      "durationMs": 4364
+    },
+    {
+      "name": "E: every historical song remains byte-for-byte equivalent to its initial structured content",
+      "status": "PASS",
+      "durationMs": 14,
+      "details": {
+        "originalSongsVerified": 26,
+        "finalSongs": 27
+      }
+    },
+    {
+      "name": "No uncaught browser JavaScript errors",
+      "status": "PASS",
+      "durationMs": 0
+    }
+  ],
+  "screenshots": [
+    "administracion.png",
+    "playlist-publica.png",
+    "letra-mobile.png",
+    "repertorio.png",
+    "presenter.png",
+    "display.png"
+  ],
+  "pageErrors": [],
+  "status": "PASS",
+  "completedAt": "2026-11-04T23:44:18.723Z"
+}

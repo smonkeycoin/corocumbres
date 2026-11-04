@@ -1,3 +1,13 @@
+# CORO CUMBRES V2
+
+Portal público de cuatro misas y administración privada con Google + allowlist en servidor. El repertorio y las publicaciones usan Vercel Blob privado; localStorage sólo conserva preferencias y sirve como fuente de migración histórica.
+
+Guía vigente: [Operación V2](docs/OPERACION_V2.md). Evidencias QA: `qa/`. Validación: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. Configuración requerida: `.env.example`.
+
+La siguiente documentación describe la versión anterior y se conserva como historial:
+
+---
+
 # CORO CUMBRES V0.1
 
 CORO CUMBRES es una biblioteca de canciones y Sets para coro de iglesia. Funciona local-first y no requiere internet una vez cargada.

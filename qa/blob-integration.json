@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "namespace": "qa/coro-v2-1793836129648-d4c692fa",
+  "checks": [
+    "independent-consistent-reads",
+    "real-blob-first-write-cas",
+    "real-blob-stale-write-rejection",
+    "cross-request-publication-and-draft-isolation",
+    "private-storage-access-and-history"
+  ],
+  "finalRevision": 5,
+  "privateBackupCount": 6,
+  "etagDiagnostics": {
+    "firstWrite": {
+      "writeQuoted": true,
+      "readQuoted": true,
+      "exactMatch": true,
+      "matchWithoutQuotes": true
+    },
+    "overwrite": {
+      "writeQuoted": true,
+      "readQuoted": true,
+      "exactMatch": true,
+      "matchWithoutQuotes": true
+    }
+  },
+  "oauthVerified": false
+}

@@ -1,0 +1,9 @@
+.env*
+qa/
+docs/
+tests/
+scripts/
+LYRICS/
+NUEVAS TRACKS/
+CORO V2 SOT.png
+*.md

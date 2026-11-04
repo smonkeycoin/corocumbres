@@ -101,7 +101,8 @@ export type PresenterState = {
   songId: string | null;
   fullLyrics?: string;
   songIndex?: number;
-  black: boolean;
+  black?: boolean;
+  isBlackout?: boolean;
   theme?: "blue" | "black";
   showChords?: boolean;
   fontScale: number;
