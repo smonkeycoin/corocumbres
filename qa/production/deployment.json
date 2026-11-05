@@ -1,0 +1,28 @@
+{
+  "verifiedAt": "2026-11-05T00:01:34.256Z",
+  "project": "corocumbres",
+  "projectId": "prj_tpEKm6bQCNS9eUovHZGoIDBouuhC",
+  "teamId": "team_LG4vLJ75SnXcNtNqKI61bIj9",
+  "deploymentId": "dpl_8ZJcSR4U511sTdQ7qrorUAUdkSKJ",
+  "status": "READY",
+  "url": "https://corocumbres.online",
+  "deploymentUrl": "https://corocumbres-mpaqo0pc5-neuro-practice-s-projects.vercel.app",
+  "aliases": [
+    "corocumbres.online",
+    "corocumbres.vercel.app",
+    "www.corocumbres.online",
+    "corocumbres-neuro-practice-s-projects.vercel.app",
+    "corocumbres-git-ebee3398b20f99-156604-neuro-practice-s-projects.vercel.app"
+  ],
+  "gitCommit": "ebee3398b20f99a121e8a1d93f5800358f0c6f04",
+  "branch": "feat/coro-cumbres-v2",
+  "target": "production",
+  "googleConfigured": false,
+  "missingEnvironmentKeys": [
+    "AUTH_GOOGLE_ID",
+    "AUTH_GOOGLE_SECRET",
+    "CORO_ADMIN_EMAILS"
+  ],
+  "repositoryVisibility": "public (explicit owner instruction)",
+  "scope": "Deployment READY and public/protection smoke verified. Live Google OAuth and authorized production administration remain blocked."
+}

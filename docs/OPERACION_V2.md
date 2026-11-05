@@ -29,3 +29,11 @@ Para recuperar un cambio anterior, utilizar las versiones privadas de `coro-v2/h
 `npm run typecheck`, `npm run lint`, `npm run build`, `npm test`. `tests/blob.integration.ts` requiere las credenciales existentes; escribe exclusivamente en un prefijo QA privado y nunca en el workspace de producción. El adaptador `CORO_DATA_FILE` está limitado a desarrollo/test y es ignorado en producción. Las sesiones firmadas utilizadas por E2E son fixtures locales y no sustituyen una prueba real del consentimiento OAuth Google.
 
 El Presenter y Display continúan disponibles en `/presenter` y `/display`, ambos protegidos. Su coordinación entre pestañas usa el canal existente; el repertorio llega del servidor después de verificar la sesión.
+
+## Seguridad de dependencias y control de versiones
+
+Next.js quedó en 16.4.5. La auditoría de producción no reportó vulnerabilidades. Permanecen ocho avisos moderados transitivos en herramientas de desarrollo (`minimatch` vía `typescript-eslint`); no se aplicó el downgrade incompatible sugerido por `npm audit --force`.
+
+Las lecturas Blob solicitan `accept-encoding: identity`: las respuestas comprimidas de entrega llevan ETags débiles y no sirven para `If-Match`. La representación original conserva el ETag fuerte que se comprobó con escrituras reales.
+
+GitHub permanece público por instrucción expresa del propietario. La frontera de acceso privado de V2 corresponde a la aplicación, sus rutas y su almacenamiento, no al código e historial públicos de GitHub.

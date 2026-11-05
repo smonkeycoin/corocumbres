@@ -1,0 +1,113 @@
+{
+  "baseURL": "https://corocumbres.online",
+  "runAt": "2026-11-04T23:59:56.508Z",
+  "checks": [
+    {
+      "name": "Home pública HTTP200",
+      "status": "PASS"
+    },
+    {
+      "name": "Exactamente cuatro misas",
+      "status": "PASS"
+    },
+    {
+      "name": "Hora nocturna no inventada",
+      "status": "PASS"
+    },
+    {
+      "name": "Bundle público sin semilla privada",
+      "status": "PASS"
+    },
+    {
+      "name": "Bundle público sin semilla privada",
+      "status": "PASS"
+    },
+    {
+      "name": "Bundle público sin semilla privada",
+      "status": "PASS"
+    },
+    {
+      "name": "Bundle público sin semilla privada",
+      "status": "PASS"
+    },
+    {
+      "name": "Bundle público sin semilla privada",
+      "status": "PASS"
+    },
+    {
+      "name": "Bundle público sin semilla privada",
+      "status": "PASS"
+    },
+    {
+      "name": "Bundle público sin semilla privada",
+      "status": "PASS"
+    },
+    {
+      "name": "Bundle público sin semilla privada",
+      "status": "PASS"
+    },
+    {
+      "name": "API pública ninos",
+      "status": "PASS"
+    },
+    {
+      "name": "API pública dominical-12",
+      "status": "PASS"
+    },
+    {
+      "name": "API pública dominical-1330",
+      "status": "PASS"
+    },
+    {
+      "name": "API pública noche",
+      "status": "PASS"
+    },
+    {
+      "name": "Playlist pública abre",
+      "status": "PASS"
+    },
+    {
+      "name": "Ruta privada protege /admin",
+      "status": "PASS"
+    },
+    {
+      "name": "Ruta privada protege /admin/repertorio",
+      "status": "PASS"
+    },
+    {
+      "name": "Ruta privada protege /admin/playlists",
+      "status": "PASS"
+    },
+    {
+      "name": "Ruta privada protege /presenter",
+      "status": "PASS"
+    },
+    {
+      "name": "Ruta privada protege /display",
+      "status": "PASS"
+    },
+    {
+      "name": "Repertorio anónimo denegado",
+      "status": "PASS"
+    },
+    {
+      "name": "Home móvil sin scroll horizontal",
+      "status": "PASS"
+    },
+    {
+      "name": "Primera misa visible en móvil",
+      "status": "PASS"
+    },
+    {
+      "name": "Sin errores JavaScript",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "oauthVerified": false,
+  "authorizedAdminVerified": false,
+  "publishedChildrenSongs": 0,
+  "adminAPIStatus": 503,
+  "googleConfigured": false,
+  "status": "PASS"
+}
