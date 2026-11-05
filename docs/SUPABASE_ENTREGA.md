@@ -19,14 +19,15 @@ Fecha: 5 de noviembre de 2026, America/Cancun. **Entrega preparada; aceptación 
 
 - Supabase Auth responde; Google estaba **deshabilitado** en la comprobación real.
 - `trinopc1@gmail.com` y `martrampomp@gmail.com` tienen los mismos permisos previstos y aprovisionamiento seguro preparado. Sus inicios de sesión reales siguen pendientes.
-- La interfaz usa PKCE, cookies SSR, rutas protegidas, redirects internos y POST con comprobación de origen para iniciar/cerrar sesión.
-- Vercel `corocumbres` (`prj_tpEKm6bQCNS9eUovHZGoIDBouuhC`) tiene URL y clave pública Supabase en Production/Development. No recibió la clave service_role. Las variables nuevas sólo se usarán en un despliegue nuevo.
+- La interfaz usa PKCE, cookies SSR, rutas protegidas, redirects internos y POST con comprobación de origen para iniciar/cerrar sesión. Login y POST consultan la configuración real de Auth antes de ofrecer Google; las claves públicas por sí solas no habilitan el botón.
+- Vercel `corocumbres` (`prj_tpEKm6bQCNS9eUovHZGoIDBouuhC`) tiene URL y clave pública Supabase en Production/Development y en Preview sólo para `codex/supabase-google-rbac`. No recibió la clave service_role. Las variables nuevas sólo se usarán en un despliegue nuevo.
+- La rama `codex/supabase-google-rbac` se publicó mediante el conector GitHub; su árbol coincide exactamente con el índice local validado. Vercel construyó una vista previa conectada. En navegador, las cuatro misas consultan la base y muestran el estado vacío previsto; la nocturna no tiene horario. El endpoint de evangelio respondió 200, fecha/título correctos y `private, no-store`.
 - **No se desplegó esta integración en producción.** `https://corocumbres.online` conserva el despliegue previo de V2; su verificación anterior no acredita esta versión.
 - Google Cloud se abrió con `trinopc1@gmail.com`; no se encontró un proyecto Coro. Se preparó el formulario `Coro Cumbres`, ID `corocumbres-auth`, sin facturación. Su creación requiere autorización específica tras rechazo de la revisión automática. No se modificaron proyectos ajenos.
 
 ## Validación comprobada
 
-- 51 pruebas de aplicación: **51 correctas**, incluidas conservación de letras/acordes/referencias, deduplicación, paginación, redirects, origen POST y calendario/almacenamiento editorial.
+- 55 pruebas de aplicación: **55 correctas**, incluidas conservación de letras/acordes/referencias, deduplicación, paginación, redirects, origen POST, estado real del proveedor Google y calendario/almacenamiento editorial.
 - 83 aserciones PostgreSQL/PGlite: **83 correctas**, incluidas ambos administradores, usuario ajeno, visitante, sesión expirada/revocada, publicar/despublicar, aislamiento, conflictos e integridad. Son fixtures locales de Auth, no sesiones Google reales.
 - TypeScript, ESLint, build de producción y `git diff --check`: **correctos** en la copia de preparación.
 - Archivos candidatos revisados contra las claves reales: **sin coincidencias**. Bundle público revisado sin canciones seed ni clave privilegiada; la cadena `sb_secret_` aparece sólo como validación de rechazo en el SDK/configuración.

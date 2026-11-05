@@ -3,6 +3,7 @@ import { Brand, GoogleMark, Icon } from "@/components/v2/Brand";
 import { getAdminAccess } from "@/lib/supabase/auth";
 import { DENIED_MESSAGE, safeAuthRedirect } from "@/lib/supabase/auth-policy";
 import { CONFIGURATION_MESSAGE } from "@/lib/supabase/config";
+import { getGoogleProviderStatus } from "@/lib/supabase/google-provider";
 
 export const dynamic = "force-dynamic";
 
@@ -10,14 +11,17 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const params = await searchParams;
   const access = await getAdminAccess();
   const configured = access.status !== "unconfigured";
+  const provider = access.status === "admin" ? "ready" : await getGoogleProviderStatus();
   const messages: Record<string, string> = {
     denied: DENIED_MESSAGE,
     configuration: CONFIGURATION_MESSAGE,
     unavailable: "No se pudieron verificar los permisos. Inténtalo nuevamente.",
     oauth: "No se pudo completar el inicio de sesión. Inténtalo nuevamente con Google.",
     logout: "No se pudo cerrar la sesión. Inténtalo nuevamente.",
+    google: "El acceso con Google todavía no está habilitado. Inténtalo más tarde.",
+    provider: "No se pudo comprobar el acceso con Google. Inténtalo nuevamente.",
   };
-  const message = !configured ? CONFIGURATION_MESSAGE : access.status === "denied" ? DENIED_MESSAGE : messages[params.error ?? ""];
+  const message = !configured ? CONFIGURATION_MESSAGE : access.status === "denied" ? DENIED_MESSAGE : messages[params.error ?? ""] || (provider === "disabled" ? messages.google : provider !== "ready" ? messages.provider : undefined);
   return <div className="v2-app v2-login-app">
     <main className="v2-login-main">
       <Link href="/" className="v2-back-link v2-login-back"><Icon name="arrow-left" size={18} />Volver al portal</Link>
@@ -28,7 +32,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         {message ? <div className="v2-login-error" role="alert" id="login-status"><Icon name="info" size={18} /><p>{message}</p></div> : null}
         {access.status === "admin" ? <Link href="/admin" className="v2-google-button"><Icon name="playlists" size={20} /><span>Entrar a administración</span></Link> : <form action="/auth/signin" method="post">
           <input type="hidden" name="next" value={safeAuthRedirect(params.next)} />
-          <button className="v2-google-button" disabled={!configured} type="submit" aria-describedby={message ? "login-status" : undefined}><GoogleMark /><span>Iniciar sesión con Google</span></button>
+          <button className="v2-google-button" disabled={!configured || provider !== "ready"} type="submit" aria-describedby={message ? "login-status" : undefined}><GoogleMark /><span>Iniciar sesión con Google</span></button>
         </form>}
         {configured && access.status !== "anonymous" ? <form action="/auth/signout" method="post"><button type="submit" className="v2-button v2-button-secondary" style={{ marginTop: 16 }}><Icon name="logout" size={16} />Cerrar sesión</button></form> : null}
         <p className="v2-login-restriction"><Icon name="lock" size={14} /><span>Solo los administradores autorizados del coro<br className="v2-login-break" /> pueden acceder a esta sección.</span></p>
