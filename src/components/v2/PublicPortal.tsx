@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getMass, masses } from "@/lib/masses";
 import type { PublicPlaylistSnapshot } from "@/lib/v2-types";
 import { Brand, Icon, MassIcon } from "./Brand";
+import { SundayGospel } from "./SundayGospel";
+import type { PublicGospel } from "@/lib/sunday-gospel";
 
 export function PublicHeader() {
   return <header className="v2-public-header"><div className="v2-header-inner"><Brand /><Link href="/admin" className="v2-admin-access"><Icon name="lock" size={16} /><span>Acceso Admin</span></Link></div></header>;
@@ -11,7 +13,7 @@ export function PublicFooter() {
   return <footer className="v2-public-footer"><span>Coro Cumbres</span><span aria-hidden="true">·</span><span>Música</span><span aria-hidden="true">·</span><span>Fe</span><span aria-hidden="true">·</span><span>Comunidad</span></footer>;
 }
 
-export function PublicHome() {
+export function PublicHome({ initialToday, initialGospel }: { initialToday: string; initialGospel: PublicGospel }) {
   return <div className="v2-app v2-public-app">
     <a className="v2-skip-link" href="#selecciona-misa">Ir a las misas</a>
     <PublicHeader />
@@ -20,6 +22,7 @@ export function PublicHome() {
         <p className="v2-welcome">Bienvenido a</p>
         <h1 id="welcome-title">Coro Cumbres</h1>
         <p className="v2-hero-description">Música que nos une en la fe.</p>
+        <SundayGospel initialToday={initialToday} initialGospel={initialGospel} />
         <span className="v2-hero-rule" aria-hidden="true" />
       </div></section>
       <section className="v2-container v2-mass-section" id="selecciona-misa" aria-labelledby="mass-title">

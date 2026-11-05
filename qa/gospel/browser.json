@@ -1,0 +1,166 @@
+{
+  "baseURL": "http://127.0.0.1:3108",
+  "startedAt": "2026-11-05T17:10:12.391Z",
+  "authentication": "Offline signed NextAuth fixture sessions; live Google OAuth was not exercised.",
+  "scope": "Local isolated fixture server and data only; no production writes.",
+  "tests": [
+    {
+      "name": "Anonymous public read succeeds; anonymous and non-admin Google identities cannot read or edit admin gospel",
+      "status": "PASS",
+      "durationMs": 6410,
+      "details": {
+        "anonymousGET": 401,
+        "anonymousPUT": 401,
+        "strangerGET": 403,
+        "strangerPUT": 403,
+        "publicPUT": 405
+      }
+    },
+    {
+      "name": "Public home on 2026-11-05 renders 2026-11-08",
+      "status": "PASS",
+      "durationMs": 2214,
+      "details": {
+        "sunday": "2026-11-08",
+        "title": "Las diez vírgenes y sus lámparas"
+      }
+    },
+    {
+      "name": "Public home on 2026-11-08 renders 2026-11-08 as EVANGELIO DE HOY",
+      "status": "PASS",
+      "durationMs": 364,
+      "details": {
+        "sunday": "2026-11-08",
+        "title": "Las diez vírgenes y sus lámparas"
+      }
+    },
+    {
+      "name": "Public home on 2026-11-09 renders 2026-11-15",
+      "status": "PASS",
+      "durationMs": 803,
+      "details": {
+        "sunday": "2026-11-15",
+        "title": "La parábola de los talentos"
+      }
+    },
+    {
+      "name": "Public home on 2026-11-15 renders 2026-11-15 as EVANGELIO DE HOY",
+      "status": "PASS",
+      "durationMs": 514,
+      "details": {
+        "sunday": "2026-11-15",
+        "title": "La parábola de los talentos"
+      }
+    },
+    {
+      "name": "Public home on 2026-11-16 renders 2026-11-22",
+      "status": "PASS",
+      "durationMs": 871,
+      "details": {
+        "sunday": "2026-11-22",
+        "title": "Encontrar a Jesús en los más pequeños"
+      }
+    },
+    {
+      "name": "The editorial block preserves four mass cards and navigation at 320, 390, 768 and 1440 pixels",
+      "status": "PASS",
+      "durationMs": 1634,
+      "details": [
+        {
+          "width": 320,
+          "scroll": 320
+        },
+        {
+          "width": 390,
+          "scroll": 390
+        },
+        {
+          "width": 768,
+          "scroll": 768
+        },
+        {
+          "width": 1440,
+          "scroll": 1440
+        }
+      ]
+    },
+    {
+      "name": "A device in America/Los_Angeles still uses Cancun Sunday before 05:00 UTC",
+      "status": "PASS",
+      "durationMs": 3327
+    },
+    {
+      "name": "A device in Europe/Madrid still uses Cancun Sunday before 05:00 UTC",
+      "status": "PASS",
+      "durationMs": 2110
+    },
+    {
+      "name": "A device in Asia/Tokyo still uses Cancun Sunday before 05:00 UTC",
+      "status": "PASS",
+      "durationMs": 1124
+    },
+    {
+      "name": "An already open page advances from Sunday to Monday without reload at Cancun midnight",
+      "status": "PASS",
+      "durationMs": 883,
+      "details": {
+        "documentLoads": 1,
+        "before": "2026-11-08",
+        "after": "2026-11-15",
+        "boundaryUTC": "2026-11-09T05:00:00Z"
+      }
+    },
+    {
+      "name": "Unknown 2029 Sunday shows a truthful fallback without inventing a gospel",
+      "status": "PASS",
+      "durationMs": 357
+    },
+    {
+      "name": "Verified local calendar remains available when the optional title API fails",
+      "status": "PASS",
+      "durationMs": 1185
+    },
+    {
+      "name": "An allowlisted Google admin edits the short title through Configuración",
+      "status": "PASS",
+      "durationMs": 3844,
+      "details": {
+        "changedField": "short_title",
+        "sunday": "2026-11-08",
+        "cycle": "A",
+        "reference": "Mt 25, 1-13"
+      }
+    },
+    {
+      "name": "A separate public browser sees the saved title without authentication",
+      "status": "PASS",
+      "durationMs": 1582
+    },
+    {
+      "name": "Stale edits, forged liturgical metadata and cross-origin writes are rejected",
+      "status": "PASS",
+      "durationMs": 145,
+      "details": {
+        "staleETag": 409,
+        "forgedMetadata": 400,
+        "nonSundayDate": 400,
+        "crossOrigin": 403
+      }
+    },
+    {
+      "name": "The browser has no runtime or SSR hydration errors",
+      "status": "PASS",
+      "durationMs": 1
+    }
+  ],
+  "screenshots": [
+    "mobile.png",
+    "desktop.png",
+    "admin.png"
+  ],
+  "pageErrors": [],
+  "hydrationErrors": [],
+  "fixtureCleanup": "Restored the canonical title in the isolated local fixture.",
+  "finishedAt": "2026-11-05T17:10:41.428Z",
+  "status": "PASS"
+}

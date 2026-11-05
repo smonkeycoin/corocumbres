@@ -8,8 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --conditions=react-server --import tsx --test tests/backend.test.ts tests/admin-data.test.ts",
-    "test:blob": "node --conditions=react-server --import tsx tests/blob.integration.ts"
+    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
+    "test:blob": "node --conditions=react-server --import tsx tests/blob.integration.ts",
+    "test:gospel:browser": "node tests/gospel-browser.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.2",
@@ -28,7 +29,8 @@
     "eslint-config-next": "16.4.5",
     "playwright": "^1.62.1",
     "tsx": "^4.23.15",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "undici": "6.29.1"
   },
   "overrides": {
     "@vercel/cli-config": "0.3.6",
