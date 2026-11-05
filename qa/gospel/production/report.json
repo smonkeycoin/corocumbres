@@ -1,0 +1,98 @@
+{
+  "baseURL": "https://corocumbres.online",
+  "startedAt": "2026-11-05T17:15:14.231Z",
+  "scope": "Anonymous production smoke checks; no tokens, OAuth login or authorized mutations.",
+  "tests": [
+    {
+      "name": "Current public API and server-rendered HTML show the current Cancun Sunday",
+      "status": "PASS",
+      "durationMs": 1205,
+      "details": {
+        "today": "2026-11-05",
+        "sunday": "2026-11-08",
+        "title": "Las diez vírgenes y sus lámparas"
+      }
+    },
+    {
+      "name": "Dated public reads return November 8 and 15; unknown 2029 Sunday returns null",
+      "status": "PASS",
+      "durationMs": 385
+    },
+    {
+      "name": "Administrative endpoints reject unauthenticated requests and the public endpoint rejects writes",
+      "status": "PASS",
+      "durationMs": 507,
+      "details": {
+        "adminGET": 503,
+        "adminPUT": 503,
+        "publicPUT": 405
+      }
+    },
+    {
+      "name": "Login accurately reflects Google authentication configuration without initiating OAuth",
+      "status": "PASS",
+      "durationMs": 6742,
+      "details": {
+        "googleLoginDisabled": true,
+        "liveOAuth": "NOT EXECUTED"
+      }
+    },
+    {
+      "name": "Anonymous current home preserves the four masses, navigation and mobile layout",
+      "status": "PASS",
+      "durationMs": 3966,
+      "details": [
+        {
+          "width": 320,
+          "scroll": 320
+        },
+        {
+          "width": 390,
+          "scroll": 390
+        },
+        {
+          "width": 768,
+          "scroll": 768
+        },
+        {
+          "width": 1440,
+          "scroll": 1440
+        }
+      ]
+    },
+    {
+      "name": "Production client advances an open Sunday page to next Sunday at Cancun midnight without reload",
+      "status": "PASS",
+      "durationMs": 2890,
+      "details": {
+        "documentLoads": 1,
+        "before": "2026-11-08",
+        "after": "2026-11-15",
+        "deviceTimezone": "Asia/Tokyo"
+      }
+    },
+    {
+      "name": "Production fallback is visible for dates beyond the verified calendar",
+      "status": "PASS",
+      "durationMs": 2613
+    },
+    {
+      "name": "Production has no browser runtime or hydration errors",
+      "status": "PASS",
+      "durationMs": 0
+    }
+  ],
+  "screenshots": [
+    "mobile.png",
+    "desktop.png"
+  ],
+  "pageErrors": [],
+  "hydrationErrors": [],
+  "currentGospel": {
+    "today": "2026-11-05",
+    "sunday": "2026-11-08",
+    "title": "Las diez vírgenes y sus lámparas"
+  },
+  "finishedAt": "2026-11-05T17:15:41.204Z",
+  "status": "PASS"
+}
