@@ -10,7 +10,7 @@ import { HttpError } from "../src/lib/server/http";
 import { GET as publicGospel } from "../src/app/api/public/gospel/route";
 import { GET as adminGospel, PUT as updateGospel } from "../src/app/api/admin/gospel/route";
 
-const keys = ["NODE_ENV", "CORO_DATA_FILE", "BLOB_READ_WRITE_TOKEN", "BLOB_STORE_ID", "AUTH_GOOGLE_ID", "AUTH_GOOGLE_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "AUTH_SECRET", "NEXTAUTH_SECRET", "CORO_ADMIN_EMAILS"];
+const keys = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "CORO_BLOB_TEST_PREFIX", "NODE_ENV", "CORO_DATA_FILE", "BLOB_READ_WRITE_TOKEN", "BLOB_STORE_ID", "AUTH_GOOGLE_ID", "AUTH_GOOGLE_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "AUTH_SECRET", "NEXTAUTH_SECRET", "CORO_ADMIN_EMAILS"];
 const previousEnvironment = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
 let directory: string;
 const sunday = "2026-11-08";
@@ -164,7 +164,7 @@ test("strict write schema rejects canonical fields and empty, oversized or multi
   for (const field of ["cycle", "gospel_reference", "celebration", "liturgical_year", "source_url", "updated_by"]) {
     assert.equal(gospelTitleRequestSchema.safeParse({ ...input, [field]: "forged" }).success, false);
   }
-  for (const short_title of ["", "   ", "a".repeat(101), "Título\ncon otra línea", "a\u0000b"]) {
+  for (const short_title of ["", "   ", "a".repeat(101), "Título\ncon otra línea", "a\u0000b", "<script>alert(1)</script>"]) {
     await assert.rejects(saveGospelTitle({ ...input, short_title }, actor));
   }
   assert.equal((await readGospelEditor(sunday)).overridden, false);

@@ -19,7 +19,7 @@ async function requestGospel(date: string, init: RequestInit): Promise<GospelRes
   const result = await response.json().catch(() => ({}));
   if (!response.ok) {
     const message = response.status === 401 ? "Tu sesión terminó. Vuelve a iniciar sesión para editar el título."
-      : response.status === 403 ? "Esta cuenta no tiene permiso para editar los evangelios."
+      : response.status === 403 ? "Esta cuenta no tiene permisos de administración."
       : response.status === 409 || response.status === 412 ? "Otro administrador guardó cambios. Tu texto sigue aquí; carga la versión actual antes de volver a guardar."
       : typeof result.error === "string" ? result.error : "No fue posible cargar o guardar el título. Inténtalo de nuevo.";
     throw new GospelRequestError(response.status, message);

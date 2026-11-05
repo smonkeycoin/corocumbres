@@ -1216,3 +1216,131 @@ textarea {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Cloud publishing keeps the established editor and the V2 public identity. */
+.admin-shell { height: 100dvh; min-height: 0; padding: 0; display: block; background: #f6f8fb; color: #102342; }
+.admin-controls { border: 0; padding: 0 20px 20px; margin: 0; min-width: 0; height: 100%; display: flex; flex-direction: column; }
+.admin-controls:disabled > :not(.cloud-feedback) { pointer-events: none; opacity: .7; }
+.admin-shell .topbar { background: #08203d; color: white; margin-inline: -20px; padding: 14px 20px; margin-bottom: 0; grid-template-columns: auto auto minmax(150px, 1fr) auto auto auto; }
+.admin-shell .topbar .v2-brand { text-decoration: none; }
+.admin-shell .topbar .v2-brand svg { width: 44px; height: 35px; }
+.admin-shell .topbar .v2-brand span { font-size: 11px; }
+.admin-shell .topbar a { color: white; }
+.admin-shell .topbar button { font-size: 12px; }
+.admin-shell button.primary { background: #165b9e; border-color: #165b9e; }
+.admin-shell .three-pane-shell, .admin-shell .library-workspace { flex: 1; min-height: 0; }
+.admin-shell .set-sidebar { background: #102d45; color: white; border-color: #102d45; }
+.admin-shell .set-sidebar .set-group-title, .admin-shell .set-sidebar small { color: #c6d7e6; }
+.admin-shell .set-sidebar .set-row-main { color: inherit; }
+.admin-shell .set-sidebar .selected-set-row { background: #254d6d; }
+.admin-shell .set-sidebar .set-row { border-color: #ffffff19; }
+.cloud-feedback:empty { display: none; }
+.cloud-feedback { flex-shrink: 0; font-size: 13px; color: #24593b; }
+.cloud-feedback p { margin: 8px 0; padding: 10px 14px; border-radius: 8px; background: #e9f3eb; overflow-wrap: anywhere; }
+.cloud-feedback .cloud-error, .cloud-error { color: #8d2924; background: #fff0ee; }
+.publication-toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; flex-shrink: 0; padding: 14px 0; }
+.publication-toolbar label { display: grid; gap: 5px; font-size: 12px; font-weight: 600; }
+.publication-toolbar select { min-height: 40px; max-width: 280px; padding: 8px; border: 1px solid #dce3ec; border-radius: 6px; background: white; color: #102342; }
+.publication-toolbar input { width: 160px; min-height: 40px; }
+.publication-toolbar button { font-size: 12px; }
+.publication-toolbar a { color: #165b9e; font-size: 12px; align-self: center; }
+.publication-status { align-self: center; font-size: 12px; padding: 8px; color: #79520c; background: #fff3d2; border-radius: 8px; }
+.publication-status.is-published { color: #24623d; background: #e6f4ea; }
+.public-date-heading { display: flex; justify-content: space-between; align-items: end; gap: 20px; }
+.public-date { display: grid; gap: 5px; font-size: 12px; color: #626e80; min-width: 155px; }
+.public-date input { min-height: 44px; color: #102342; border-color: #e0e5eb; }
+.v2-app button.v2-mass-card { border: 0; text-align: left; width: 100%; font-family: inherit; }
+.v2-app button.v2-public-song-row { width: 100%; border: 0; text-align: left; background: transparent; color: inherit; }
+.v2-app button.v2-public-song-row:hover { background: #f4f7fb; }
+.v2-app button.v2-back-link { border: 0; background: transparent; padding-left: 0; }
+.public-gospel-title { font-size: 14px; color: #836a3e; margin-top: 12px !important; }
+.public-load-error { margin-top: 20px; padding: 18px; background: #fff4ee; color: #813f24; border-radius: 12px; font-size: 13px; }
+.public-load-error button { margin-top: 10px; }
+.public-lyrics-reader { max-width: 760px; margin-inline: auto; }
+.public-lyrics-reader h2 { font-size: clamp(24px, 4vw, 36px); margin-top: 20px; }
+.public-moment-title { font-size: 12px; letter-spacing: .08em; color: #62768c; margin: 28px 0 12px !important; }
+.public-chord-song section { margin-bottom: 28px; overflow-x: auto; }
+.public-chord-song h3 { font-size: 12px; color: #62768c; }
+.public-chord-song pre { margin: 0; font: inherit; font-family: var(--teleprompter-font); line-height: 1.8; }
+.public-chord-song .public-chords { color: #165b9e; line-height: 1.3; margin-top: 12px; font-weight: bold; }
+@media (max-width: 1000px) {
+  .admin-shell .topbar { display: flex; flex-wrap: wrap; }
+  .admin-shell .topbar > input { width: auto; flex: 1; min-width: 140px; }
+  .admin-shell { height: auto; min-height: 100dvh; overflow: visible; }
+  .admin-controls { height: auto; }
+  .admin-shell .three-pane-shell, .admin-shell .library-workspace { overflow: visible; min-height: 550px; }
+}
+@media (max-width: 600px) {
+  .public-date-heading { align-items: start; flex-direction: column; gap: 14px; }
+  .public-date { display: flex; align-items: center; width: 100%; gap: 12px; }
+  .public-date input { flex: 1; }
+  .public-gospel-title { font-size: 12px; }
+  .publication-toolbar label { flex: 1; min-width: 140px; }
+  .publication-toolbar input, .publication-toolbar select { width: 100%; max-width: none; }
+  .admin-controls { padding-inline: 12px; }
+  .admin-shell .topbar { margin-inline: -12px; padding-inline: 12px; }
+  .admin-shell .topbar .v2-brand { flex: 1; }
+}
+
+/* V2 administration frame: persistent navy navigation and a light workspace. */
+.cloud-admin-nav { position: fixed; inset: 0 auto 0 0; z-index: 20; width: 196px; padding: 25px 14px; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(155deg, #102e46, #071f36 72%); color: #eef4fc; }
+.cloud-admin-nav .v2-brand { text-decoration: none; margin-bottom: 30px; gap: 7px; }
+.cloud-admin-nav .v2-brand svg { width: 43px; height: 35px; }
+.cloud-admin-nav .v2-brand span { font-size: 10px; letter-spacing: .06em; }
+.cloud-admin-nav > p { font-size: 9px; letter-spacing: .14em; color: #a3b7cc; padding: 0 10px; }
+.cloud-admin-nav nav { display: grid; gap: 6px; }
+.cloud-admin-nav nav button, .cloud-admin-nav .cloud-public-link { display: flex; gap: 10px; align-items: center; min-height: 46px; padding: 10px 12px; color: #d7e2ef; background: transparent; border: 0; font-size: 13px; text-decoration: none; text-align: left; border-radius: 8px; }
+.cloud-admin-nav nav button.current { color: white; background: #2b516f; }
+.cloud-admin-nav .cloud-public-link { margin-top: auto; }
+.cloud-admin-nav small { font-size: 9px; color: #9bafc3; padding: 12px; }
+.admin-controls { margin-left: 196px; width: calc(100% - 196px); }
+.admin-shell .topbar { background: #fff; color: #102342; border-bottom: 1px solid #e5e9ef; grid-template-columns: auto minmax(160px, 1fr) auto auto; min-height: 72px; gap: 14px; }
+.admin-private-label { color: #62768c; font-size: 12px; }
+.admin-shell .set-sidebar { background: white; color: #102342; border-color: #e0e6ee; }
+.admin-shell .set-sidebar .set-group-title, .admin-shell .set-sidebar small { color: #62768c; }
+.admin-shell .set-sidebar .selected-set-row { background: #edf4fc; }
+.admin-shell .set-sidebar .set-row { border-color: transparent; }
+.admin-shell .set-sidebar .selected-set-row { border-left-color: #165b9e; }
+.admin-shell .sidebar-header { align-items: start; flex-direction: column; gap: 12px; }
+.admin-shell .panel, .admin-shell .set-workspace-panel, .admin-shell .song-workspace-panel, .admin-shell .library-pane { border-color: #e0e6ee; border-radius: 12px; }
+.admin-shell button { min-height: 40px; }
+@media (max-width: 1000px) {
+  .cloud-admin-nav { position: relative; width: 100%; padding: 14px 20px; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .cloud-admin-nav .v2-brand { margin: 0 auto 0 0; }
+  .cloud-admin-nav > p, .cloud-admin-nav > small { display: none; }
+  .cloud-admin-nav nav { display: flex; }
+  .cloud-admin-nav .cloud-public-link { margin: 0; font-size: 12px; }
+  .admin-controls { margin-left: 0; width: 100%; }
+}
+@media (max-width: 600px) {
+  .cloud-admin-nav { padding: 12px; }
+  .cloud-admin-nav .v2-brand { flex-basis: 55%; }
+  .cloud-admin-nav nav { order: 3; flex-basis: 100%; }
+  .cloud-admin-nav nav button { flex: 1; }
+  .cloud-admin-nav .cloud-public-link { font-size: 10px; padding-inline: 0; }
+  .admin-shell .topbar { gap: 8px; }
+  .admin-private-label { flex-basis: 100%; }
+  .admin-shell .topbar input { flex-basis: 100%; }
+  .admin-shell .library-workspace { display: flex; flex-direction: column; }
+  .admin-shell .song-workspace-panel { min-height: 400px; }
+  .admin-shell .song-toolbar { position: static; display: flex; flex-wrap: wrap; }
+}
+
+.cloud-admin-nav nav a { display: flex; gap: 10px; align-items: center; min-height: 46px; padding: 10px 12px; color: #d7e2ef; background: transparent; font-size: 13px; text-decoration: none; border-radius: 8px; }
+.cloud-admin-nav nav a:hover { background: #ffffff0a; }
+.admin-gospel-editor { padding: 28px; margin-top: 26px; background: white; border: 1px solid #e4eaf2; border-radius: 16px; color: #102342; }
+.admin-gospel-editor > p { color: #62768c; font-size: 14px; line-height: 1.7; }
+.admin-gospel-date { display: grid; gap: 7px; }
+.admin-gospel-date select { width: 100%; min-height: 44px; padding: 10px 12px; background: white; color: #203d60; border: 1px solid #dce5ef; border-radius: 8px; }
+.admin-gospel-form { display: grid; gap: 18px; margin-top: 20px; }
+.admin-gospel-form label { display: grid; gap: 8px; font-size: 13px; }
+.admin-gospel-details { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,200px),1fr)); gap: 16px; margin: 0; padding: 16px 0; border-block: 1px solid #edf1f6; }
+.admin-gospel-details dt { font-size: 10px; color: #71859d; margin-bottom: 5px; }
+.admin-gospel-details dd { margin: 0; color: #355575; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.admin-gospel-form .admin-small { margin-top: -10px; color: #62768c; font-size: 12px; }
+.admin-gospel-form .admin-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.admin-gospel-form .admin-status { font-size: 12px; color: #437557; }
+.admin-gospel-form .admin-status.pending { color: #907947; }
+.admin-gospel-form .admin-notice { padding: 15px 18px; border: 1px solid #d5eadd; border-radius: 10px; background: #f1faf4; color: #437557; font-size: 12px; }
+.admin-gospel-form .admin-error { padding: 18px; border: 1px solid #f0d6d3; border-radius: 10px; background: #fff8f6; color: #9f534d; font-size: 12px; }
+.admin-gospel-form .v2-button.primary { background: #155c9f; color: white; border-color: #155c9f; }

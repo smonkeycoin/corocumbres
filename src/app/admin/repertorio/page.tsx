@@ -1,2 +1,2 @@
-import { AdminWorkspace } from "@/components/v2/AdminWorkspace";
-export default function Page(){return <AdminWorkspace view="library"/>;}
+import { redirect } from "next/navigation";
+export default function Page() { redirect("/admin?view=library"); }

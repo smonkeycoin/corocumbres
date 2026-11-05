@@ -1,5 +1,7 @@
 # Evangelio dominical dinámico — entrega y producción
 
+> Evidencia histórica de V2 anterior a la integración Supabase. Se conserva del commit `69d3f6b`; los resultados y las credenciales pendientes descritos aquí corresponden a ese despliegue, no verifican el código nuevo. Para el estado actual, consulta `SUPABASE_OPERACION.md`.
+
 Verificado el **5 de noviembre de 2026, 12:15, America/Cancun**.
 
 La función pública está desplegada y operativa en [corocumbres.online](https://corocumbres.online). Muestra **8 NOV 2026 — Las diez vírgenes y sus lámparas** debajo de «Música que nos une en la fe.». La asignación corresponde a Mt 25, 1-13, XXXII Domingo Ordinario, ciclo A. La referencia y el texto bíblico no aparecen en la interfaz pública.

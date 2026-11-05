@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./v2.css";
-import "./admin-v2.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://corocumbres.online"),
   title: { default: "Coro Cumbres", template: "%s | Coro Cumbres" },

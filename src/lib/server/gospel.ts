@@ -6,7 +6,7 @@ import { BlobPreconditionFailedError, get, put } from "@vercel/blob";
 import { z } from "zod";
 import { getSunday } from "../sunday-gospel";
 import { HttpError } from "./http";
-import { getStorageConfigurationStatus, getStorageNamespace } from "./workspace";
+import { getStorageConfigurationStatus, getStorageNamespace } from "./gospel-storage";
 
 const EMPTY_ETAG = "missing";
 const MAX_STORED_BYTES = 4096;
@@ -24,7 +24,7 @@ export function validateSundayDate(value: string): string {
   return value;
 }
 
-const titleSchema = z.string().trim().min(1).max(100).refine((title) => !/[\u0000-\u001f\u007f]/.test(title), "Usa un título de una sola línea.");
+const titleSchema = z.string().trim().min(1).max(100).refine((title) => !/[<>\u0000-\u001f\u007f]/.test(title), "Usa un título de una sola línea, sin HTML.");
 
 export const gospelTitleRequestSchema = z.object({
   sunday_date: z.string().transform(validateSundayDate),

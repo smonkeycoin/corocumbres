@@ -70,7 +70,18 @@ export type SetSection = {
   items: SetItem[];
 };
 
+export type Mass = {
+  id: string;
+  name: string;
+  time: string | null;
+  sortOrder: number;
+};
+
 export type CoroSet = {
+  massId?: string;
+  status?: "draft" | "published";
+  version?: number;
+  publishedAt?: string | null;
   id: string;
   name: string;
   type: SetType;

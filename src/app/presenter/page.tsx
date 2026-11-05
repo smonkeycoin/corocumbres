@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import { getAdminSession } from "@/lib/server/auth";
-import { readWorkspace } from "@/lib/server/workspace";
-import { Presenter } from "@/components/PresenterViews";
+import { CloudPresenter } from "@/components/CloudPresenter";
+import { getAdminAccess } from "@/lib/supabase/auth";
+
 export const dynamic = "force-dynamic";
-export const metadata = { robots: { index: false, follow: false } };
+
 export default async function Page() {
- if (!await getAdminSession()) redirect("/login");
- const {state}=await readWorkspace();
- return <Presenter initialSongs={state.songs} initialSets={state.sets}/>;
+  const access = await getAdminAccess();
+  if (access.status !== "admin") redirect("/login?next=/presenter");
+  return <CloudPresenter />;
 }

@@ -26,7 +26,7 @@ function subscribeToCancunDay(onChange: () => void) {
   };
 }
 
-export function SundayGospel({ initialToday, initialGospel }: { initialToday: string; initialGospel: PublicGospel }) {
+export function SundayGospel({ initialToday, initialGospel, compact = false }: { initialToday: string; initialGospel: PublicGospel; compact?: boolean }) {
   // The serialized server day is also used by the first client render, even at midnight.
   const today = useSyncExternalStore(subscribeToCancunDay, getCancunDate, () => initialToday);
   const sundayDate = getSundayDateForLocalDay(today);
@@ -63,10 +63,10 @@ export function SundayGospel({ initialToday, initialGospel }: { initialToday: st
   }, [sundayDate]);
 
   return <div className="v2-sunday-gospel" aria-live="polite" aria-atomic="true" data-sunday={sundayDate}>
-    <p className="v2-gospel-label">
+    {!compact && <p className="v2-gospel-label">
       <span>{today === sundayDate ? "EVANGELIO DE HOY" : "EVANGELIO DEL PRÓXIMO DOMINGO"}</span>
       <span aria-hidden="true"> · </span><time dateTime={sundayDate}>{formatSundayDate(sundayDate)}</time>
-    </p>
+    </p>}
     <p className="v2-gospel-title">{title || GOSPEL_FALLBACK}</p>
   </div>;
 }

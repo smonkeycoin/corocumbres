@@ -8,32 +8,35 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
-    "test:blob": "node --conditions=react-server --import tsx tests/blob.integration.ts",
-    "test:gospel:browser": "node tests/gospel-browser.mjs"
+    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts && node supabase/tests/run-rls.mjs",
+    "test:rls": "node supabase/tests/run-rls.mjs",
+    "test:http": "node scripts/smoke-http.mjs",
+    "migrate:library": "node --import tsx scripts/migrate-library.ts"
   },
   "dependencies": {
-    "@vercel/blob": "^2.8.2",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.119.0",
+    "@vercel/blob": "2.8.2",
     "next": "16.4.5",
-    "next-auth": "^4.24.15",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "server-only": "^0.0.1",
-    "zod": "^4.6.7"
+    "server-only": "0.0.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.15",
     "@types/node": "^24.3.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "eslint": "^9.34.0",
     "eslint-config-next": "16.4.5",
     "playwright": "^1.62.1",
-    "tsx": "^4.23.15",
+    "tsx": "4.23.15",
     "typescript": "^5.9.2",
     "undici": "6.29.1"
   },
   "overrides": {
-    "@vercel/cli-config": "0.3.6",
-    "source-map-js": "1.2.2"
+    "source-map-js": "1.2.2",
+    "@vercel/cli-config": "0.3.6"
   }
 }

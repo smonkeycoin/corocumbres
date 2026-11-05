@@ -2,11 +2,18 @@
 
 import { ChangeEvent, CSSProperties, DragEvent, forwardRef, MouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ensureSetStructure, flattenSetItems, libraryFilters, liturgicalMoments, createSet, makeSetItem, normalizeItems, setTypeLabel, sortItems, sortSections } from "@/lib/liturgy";
-import { makeSong, sectionLines, sectionsToText, songToFullLyrics, textToSections } from "@/lib/song-format";
-import { loadLibrary, loadPrefs, loadSets, saveLibrary, savePrefs, saveSets, validateImport, validateSetImport } from "@/lib/storage";
+import { makeSong, sectionLines, sectionsToText, songToFullLyrics } from "@/lib/song-format";
+import { loadPrefs, validateSetImport } from "@/lib/storage";
 import { publishPresenterState } from "@/lib/presenter-channel";
-import { CoroSet, LiturgicalMoment, SetItem, SetSection, SetType, Song } from "@/lib/types";
+import { CoroSet, LiturgicalMoment, SetItem, SetSection, SetType, Song, Mass } from "@/lib/types";
+
+import { loadAdminData, saveSong, deleteSong as deleteRemoteSong, saveSet, importLocalSongs } from "@/lib/cloud-repository";
+
+import { prepareLegacyImport } from "@/lib/legacy-import";
+import { buildEditedSong, editedSongSections } from "@/lib/song-editor";
+import { Brand, Icon } from "./v2/Brand";
 
 type MainView = "sets" | "library";
 type PendingAddTarget = string | "choose" | null;
@@ -52,36 +59,48 @@ function useCoroStore() {
   const [ready, setReady] = useState(false);
   const [songs, setSongs] = useState<Song[]>([]);
   const [sets, setSets] = useState<CoroSet[]>([]);
-  const [fontScale, setFontScale] = useState(1);
+  const [masses, setMasses] = useState<Mass[]>([]);
+  const [error, setError] = useState("");
+  const persistedSongs = useRef(new Set<string>());
+  const songVersions = useRef(new Map<string, string>());
+  const persistedSets = useRef(new Map<string, string>());
 
   useEffect(() => {
-    setSongs(loadLibrary());
-    setSets(loadSets());
-    setFontScale(loadPrefs().fontScale);
-    setReady(true);
+    let alive = true;
+    loadAdminData().then((data) => {
+      if (!alive) return;
+      setSongs(data.songs);
+      setSets(data.sets);
+      setMasses(data.masses);
+      persistedSongs.current = new Set(data.songs.map((song) => song.id));
+      songVersions.current = new Map(data.songs.map((song) => [song.id, song.updatedAt]));
+      persistedSets.current = new Map(data.sets.map((set) => [set.id, JSON.stringify(set)]));
+    }).catch((error: unknown) => {
+      if (alive) setError(error instanceof Error ? error.message : "No se pudieron cargar los datos.");
+    }).finally(() => { if (alive) setReady(true); });
+    return () => { alive = false; };
   }, []);
 
-  useEffect(() => {
-    if (ready) saveLibrary(songs);
-  }, [ready, songs]);
-
-  useEffect(() => {
-    if (ready) saveSets(sets);
-  }, [ready, sets]);
-
-  useEffect(() => {
-    if (ready) {
-      const prefs = loadPrefs();
-      savePrefs({ schemaVersion: 1, fontScale, theme: prefs.theme ?? "blue", showChords: prefs.showChords ?? false });
-    }
-  }, [ready, fontScale]);
-
-  return { ready, songs, setSongs, sets, setSets, fontScale, setFontScale };
+  return { ready, songs, setSongs, sets, setSets, masses, error, setError, persistedSongs, songVersions, persistedSets };
 }
 
 export function Dashboard() {
   const router = useRouter();
-  const { ready, songs, setSongs, sets, setSets, fontScale, setFontScale } = useCoroStore();
+  const { ready, songs, setSongs, sets, setSets, masses, error, setError, persistedSongs, songVersions, persistedSets } = useCoroStore();
+  const [pending, setPending] = useState(false);
+  const [notice, setNotice] = useState("");
+  const operationRef = useRef(false);
+
+  async function runOperation(action: () => Promise<void>) {
+    if (operationRef.current) return;
+    operationRef.current = true;
+    setPending(true);
+    setError("");
+    setNotice("");
+    try { await action(); }
+    catch (error) { setError(error instanceof Error ? error.message : "No se pudo completar la operación. Tus cambios siguen aquí."); }
+    finally { setPending(false); operationRef.current = false; }
+  }
   const [view, setView] = useState<MainView>("sets");
   const [query, setQuery] = useState("");
   const [momentFilter, setMomentFilter] = useState<"all" | LiturgicalMoment>("all");
@@ -120,6 +139,18 @@ export function Dashboard() {
     if (!selectedSongId && songs[0]) setSelectedSongId(songs[0].id);
   }, [selectedSongId, songs]);
 
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("view") === "library") setView("library");
+  }, []);
+
+  useEffect(() => {
+    const hasChanges = editingSong || sets.some((set) => !set.isArchived && persistedSets.current.get(set.id) !== JSON.stringify(set));
+    if (!hasChanges) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [editingSong, sets, persistedSets]);
+
   const filteredSongs = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return songs.filter((song) => {
@@ -130,6 +161,12 @@ export function Dashboard() {
       return matchesQuery && matchesMoment;
     });
   }, [query, songs, momentFilter]);
+
+  function selectSong(id: string) {
+    if (editingSong && id !== selectedSongId && !confirm("Hay cambios de canción sin guardar. ¿Cambiar de canción y descartarlos?")) return;
+    if (id !== selectedSongId) setEditingSong(false);
+    setSelectedSongId(id);
+  }
 
   function updateSet(id: string, updater: (set: CoroSet) => CoroSet) {
     setSets((current) => current.map((set) => (set.id === id ? updater(set) : set)));
@@ -147,7 +184,7 @@ export function Dashboard() {
     setOpenSetId(id);
     setPendingAddSectionId(null);
     setView("sets");
-    router.replace(`/?set=${encodeURIComponent(id)}`, { scroll: false });
+    router.replace(`/admin?set=${encodeURIComponent(id)}`, { scroll: false });
   }
 
   function chooseSectionForSong(set: CoroSet) {
@@ -193,7 +230,7 @@ export function Dashboard() {
   }
 
   function addSet(type: SetType) {
-    const set = createSet(type);
+    const set = { ...createSet(type), status: "draft" as const };
     setSets([set, ...sets]);
     setOpenSetId(set.id);
     setRenamingId(set.id);
@@ -208,11 +245,17 @@ export function Dashboard() {
     setRenamingId(null);
   }
 
-  function archiveSet(id: string) {
+  async function archiveSet(id: string) {
     const set = sets.find((item) => item.id === id);
-    if (!set || !confirm(`Archivar "${set.name}"?`)) return;
-    updateSet(id, (item) => ({ ...item, isArchived: true, updatedAt: nowIso() }));
-    if (openSetId === id) setOpenSetId(null);
+    if (!set || !confirm(`¿Archivar "${set.name}"? Dejará de ser visible al público.`)) return;
+    await runOperation(async () => {
+      const archived = { ...set, isArchived: true, status: "draft" as const, updatedAt: nowIso() };
+      const saved = persistedSets.current.has(id) ? await saveSet(archived) : archived;
+      if (persistedSets.current.has(id)) persistedSets.current.set(id, JSON.stringify(saved));
+      setSets((current) => current.map((item) => item.id === id ? saved : item));
+      if (openSetId === id) setOpenSetId(null);
+      setNotice("Repertorio archivado.");
+    });
   }
 
   function duplicateSet(id: string) {
@@ -220,6 +263,8 @@ export function Dashboard() {
     if (!source) return;
     const copy = createSet(source.type, `${source.name} copia`);
     copy.date = source.date;
+    copy.massId = source.massId;
+    copy.status = "draft";
     copy.notes = source.notes;
     copy.sections = sortSections(source.sections).map((section) => ({
       ...section,
@@ -287,17 +332,48 @@ export function Dashboard() {
     }));
   }
 
-  function deleteSong(song: Song) {
-    if (!confirm(`Eliminar "${song.title}" de la biblioteca local? Se quitara de todos los Sets.`)) return;
-    setSongs(songs.filter((item) => item.id !== song.id));
-    setSets(sets.map((set) => ({
-      ...set,
-      updatedAt: nowIso(),
-      sections: set.sections.map((section) => ({ ...section, items: normalizeItems(sortItems(section.items).filter((item) => item.songId !== song.id)) }))
-    })));
+  async function deleteSong(song: Song) {
+    if (editingSong) { setError("Guarda o cancela la edición de la canción antes de eliminarla."); return; }
+    if (!confirm(`¿Eliminar "${song.title}"? Las canciones usadas en repertorios están protegidas y deben retirarse primero.`)) return;
+    await runOperation(async () => {
+      if (persistedSongs.current.has(song.id)) await deleteRemoteSong(song.id);
+      setSongs((current) => current.filter((item) => item.id !== song.id));
+      persistedSongs.current.delete(song.id);
+      setNotice("Canción eliminada.");
+    });
+  }
+
+  async function persistSet(status: "draft" | "published") {
+    if (!activeSet) return;
+    await runOperation(async () => {
+      if (!activeSet.massId || !activeSet.date) throw new Error("Selecciona la misa y la fecha dominical antes de guardar.");
+      if (new Date(`${activeSet.date}T12:00:00Z`).getUTCDay() !== 0) throw new Error("La fecha del repertorio debe ser un domingo.");
+      const missing = flattenSetItems(activeSet).some(({ item }) => !persistedSongs.current.has(item.songId));
+      if (missing) throw new Error("Guarda primero las canciones nuevas en la biblioteca.");
+      const saved = await saveSet({ ...activeSet, status });
+      persistedSets.current.set(saved.id, JSON.stringify(saved));
+      setSets((current) => current.map((set) => set.id === saved.id ? saved : set));
+      setNotice(status === "published" ? "Playlist publicada. Ya está disponible en el portal público." : "Borrador guardado en Supabase. No es visible al público.");
+    });
+  }
+
+  async function persistSong(song: Song, expectedUpdatedAt: string) {
+    await runOperation(async () => {
+      const saved = await saveSong(song, { create: !persistedSongs.current.has(song.id), expectedUpdatedAt });
+      persistedSongs.current.add(saved.id);
+      songVersions.current.set(saved.id, saved.updatedAt);
+      setSongs((current) => current.some((item) => item.id === saved.id) ? current.map((item) => item.id === saved.id ? saved : item) : [saved, ...current]);
+      setSelectedSongId(saved.id);
+      setEditingSong(false);
+      setNotice("Canción guardada en Supabase.");
+    });
   }
 
   function presentSet(set: CoroSet) {
+    if (editingSong || persistedSets.current.get(set.id) !== JSON.stringify(set)) {
+      setError("Guarda la canción y el repertorio como borrador o publícalo antes de presentar. Los cambios sin guardar siguen aquí.");
+      return;
+    }
     const flat = flattenSetItems(set);
     if (!flat.length) {
       alert("Agrega al menos una canción para presentar.");
@@ -319,7 +395,7 @@ export function Dashboard() {
       black: false,
       theme: prefs.theme ?? "blue",
       showChords: prefs.showChords ?? false,
-      fontScale
+      fontScale: prefs.fontScale
     });
     router.push(`/presenter?set=${set.id}`);
   }
@@ -339,36 +415,71 @@ export function Dashboard() {
     );
   }
 
+  async function importSongsSafely(value: unknown) {
+    if (editingSong) throw new Error("Guarda o cancela la edición de la canción antes de importar.");
+    const result = await importLocalSongs(value);
+    const data = await loadAdminData();
+    persistedSongs.current = new Set(data.songs.map((song) => song.id));
+    songVersions.current = new Map(data.songs.map((song) => [song.id, song.updatedAt]));
+    setSongs((current) => [...data.songs, ...current.filter((song) => !persistedSongs.current.has(song.id))]);
+    setNotice(`${result.inserted} canciones importadas; ${result.skipped} ya existentes. ${result.conflicts.length ? `Versiones distintas conservadas sin sobrescribir: ${result.conflicts.join(", ")}.` : "Sin conflictos."} Los datos originales se conservan.`);
+    return result;
+  }
+
   async function importLibrary(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
-    try {
+    await runOperation(async () => {
       const parsed = JSON.parse(await file.text()) as unknown;
-      if (!validateImport(parsed)) throw new Error("Invalid schema");
-      setSongs(parsed);
-      alert("Biblioteca importada.");
-    } catch {
-      alert("El archivo no tiene un formato valido de CORO CUMBRES.");
-    } finally {
-      event.target.value = "";
-    }
+      const songs = Array.isArray(parsed) ? parsed : (parsed as { songs?: unknown })?.songs;
+      await importSongsSafely(songs);
+    });
+  }
+
+  async function importBrowser() {
+    await runOperation(async () => {
+      const payload = await prepareLegacyImport(localStorage);
+      if (!payload.songs.length) throw new Error("No hay una biblioteca histórica guardada en este navegador. Puedes importar un archivo JSON.");
+      await importSongsSafely(payload.songs);
+    });
+  }
+
+  function remapImportedSet(set: CoroSet, mapping: Record<string, string>): CoroSet {
+    return { ...set, sections: set.sections.map((section) => ({ ...section, items: section.items.map((item) => ({ ...item, songId: mapping[item.songId] ?? item.songId })) })) };
+  }
+
+  function stageImportedSet(value: unknown, mapping: Record<string, string> = {}) {
+    if (!validateSetImport(value)) throw new Error("El archivo no contiene un repertorio válido.");
+    const source = ensureSetStructure(value);
+    const fresh = createSet(source.type, `${source.name} · importado`);
+    const imported: CoroSet = { ...source, id: fresh.id, shareId: fresh.shareId, status: "draft", version: undefined, publishedAt: null, isArchived: false, updatedAt: nowIso() };
+    setSets((current) => [remapImportedSet(imported, mapping), ...current]);
+    setOpenSetId(imported.id);
+    setView("sets");
   }
 
   async function importSet(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
-    try {
+    await runOperation(async () => {
       const parsed = JSON.parse(await file.text()) as { set?: unknown; songs?: unknown };
-      if (!validateSetImport(parsed.set)) throw new Error("Invalid set");
-      const importedSet = ensureSetStructure(parsed.set);
-      setSets([importedSet, ...sets.filter((set) => set.id !== importedSet.id)]);
-      if (validateImport(parsed.songs)) setSongs([...parsed.songs.filter((song) => !songs.some((existing) => existing.id === song.id)), ...songs]);
-      setOpenSetId(importedSet.id);
-    } catch {
-      alert("El archivo no tiene un formato valido de Set CORO CUMBRES.");
-    } finally {
-      event.target.value = "";
-    }
+      if (!validateSetImport(parsed.set)) throw new Error("El archivo no tiene un formato válido de repertorio CORO CUMBRES.");
+      const report = parsed.songs !== undefined ? await importSongsSafely(parsed.songs) : null;
+      stageImportedSet(parsed.set, report?.songIdMap);
+      setNotice(`Repertorio recuperado como copia sin guardar. Revisa las canciones, selecciona misa y domingo y guarda el borrador. El original se conserva.${report?.conflicts.length ? ` Versiones distintas conservadas: ${report.conflicts.join(", ")}.` : ""}`);
+    });
+  }
+
+  async function importBrowserSets() {
+    await runOperation(async () => {
+      const payload = await prepareLegacyImport(localStorage);
+      if (!payload.sets.length) throw new Error("No hay repertorios históricos en este navegador. Puedes importar un archivo JSON.");
+      const report = payload.songs.length ? await importSongsSafely(payload.songs) : null;
+      payload.sets.forEach((set) => stageImportedSet(set, report?.songIdMap));
+      setNotice(`${payload.sets.length} repertorios recuperados como copias sin guardar${report ? `; ${report.inserted} canciones importadas` : ""}. Revisa y asigna misa y domingo a cada uno. Los originales se conservan.${report?.conflicts.length ? ` Versiones distintas conservadas: ${report.conflicts.join(", ")}.` : ""}`);
+    });
   }
 
   if (!ready) return <main className="app-shell">Cargando CORO CUMBRES...</main>;
@@ -376,19 +487,45 @@ export function Dashboard() {
   const activeSetSongCount = activeSet ? flattenSetItems(activeSet).length : 0;
 
   return (
-    <main className="app-shell">
-      <header className="topbar">
-        <div className="brand">CORO CUMBRES</div>
-        <nav className="nav-tabs">
-          <button className={view === "library" ? "active-tab" : ""} onClick={() => setView("library")}>Biblioteca</button>
-          <button className={view === "sets" ? "active-tab" : ""} onClick={() => setView("sets")}>Sets</button>
-          <button disabled={!activeSet || activeSetSongCount === 0} onClick={() => activeSet && presentSet(activeSet)}>Presentar</button>
+    <main className="app-shell admin-shell" onClickCapture={(event) => {
+      const anchor = (event.target as HTMLElement).closest("a");
+      const hasUnsaved = editingSong || sets.some((set) => !set.isArchived && persistedSets.current.get(set.id) !== JSON.stringify(set));
+      if (anchor && anchor.target !== "_blank" && hasUnsaved && !confirm("Hay cambios sin guardar. ¿Salir de administración y descartarlos?")) { event.preventDefault(); event.stopPropagation(); }
+    }}>
+      <aside className="cloud-admin-nav">
+        <Brand href="/admin" compact />
+        <p>ESPACIO DEL CORO</p>
+        <nav aria-label="Administración">
+          <button className={view === "sets" ? "current" : ""} aria-current={view === "sets" ? "page" : undefined} disabled={editingSong || pending} onClick={() => setView("sets")}><Icon name="playlists" size={19} />Playlists</button>
+          <button className={view === "library" ? "current" : ""} aria-current={view === "library" ? "page" : undefined} onClick={() => setView("library")}><Icon name="library" size={19} />Biblioteca</button>
+          <Link href="/admin/configuracion"><Icon name="settings" size={19} />Configuración</Link>
         </nav>
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por titulo o letra" />
-        <button onClick={() => window.open("/display", "_blank")}>Display</button>
+        <Link href="/" className="cloud-public-link"><Icon name="external" size={18} />Ver portal público</Link>
+        <small>Música · Fe · Comunidad</small>
+      </aside>
+      <fieldset className="admin-controls" disabled={pending} aria-busy={pending}>
+      <header className="topbar">
+        <span className="admin-private-label">Administración privada</span>
+        <input value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Buscar por título o letra" placeholder="Buscar por título o letra" />
+        <form action="/auth/signout" method="post"><button type="submit">Cerrar sesión</button></form>
         <button className="primary" disabled={!activeSet || activeSetSongCount === 0} onClick={() => activeSet && presentSet(activeSet)}>Presentar</button>
       </header>
 
+      <div className="cloud-feedback" aria-live="polite">
+        {pending ? <p role="status">Guardando cambios…</p> : null}
+        {error ? <p role="alert" className="cloud-error">{error}</p> : null}
+        {notice ? <p role="status">{notice}</p> : null}
+      </div>
+      {view === "sets" && activeSet ? <section className="publication-toolbar" aria-label="Publicación del repertorio">
+        <label>Misa<select value={activeSet.massId ?? ""} onChange={(event) => updateSet(activeSet.id, (set) => ({ ...set, massId: event.target.value }))}>
+          <option value="">Seleccionar misa</option>{masses.map((mass) => <option key={mass.id} value={mass.id}>{mass.name}{mass.time ? ` · ${mass.time}` : ""}</option>)}
+        </select></label>
+        <label>Domingo<input aria-label="Fecha dominical" type="date" value={activeSet.date ?? ""} onChange={(event) => updateSet(activeSet.id, (set) => ({ ...set, date: event.target.value }))} /></label>
+        <span className={`publication-status ${activeSet.status === "published" ? "is-published" : ""}`}>{activeSet.status === "published" ? "Publicada" : "Borrador"}{persistedSets.current.get(activeSet.id) !== JSON.stringify(activeSet) ? " · cambios sin guardar" : ""}</span>
+        <button onClick={() => persistSet("draft")}>{activeSet.status === "published" ? "Despublicar y guardar borrador" : "Guardar borrador"}</button>
+        <button className="primary" onClick={() => persistSet("published")} disabled={activeSetSongCount === 0}>{activeSet.status === "published" ? "Publicar cambios" : "Publicar playlist"}</button>
+        {activeSet.status === "published" && activeSet.shareId ? <a href={`/p/${encodeURIComponent(activeSet.shareId)}`} target="_blank" rel="noreferrer">Abrir enlace público ↗</a> : null}
+      </section> : null}
       {view === "sets" ? (
         <section className="three-pane-shell">
           <SetSidebar
@@ -407,7 +544,7 @@ export function Dashboard() {
               set={activeSet}
               songs={songs}
               addSongToSection={addSongToSection}
-              setSelectedSongId={setSelectedSongId}
+              setSelectedSongId={selectSong}
               removeItem={removeItem}
               moveItem={moveItem}
               reorderItem={reorderItem}
@@ -432,7 +569,7 @@ export function Dashboard() {
             momentFilter={momentFilter}
             setMomentFilter={setMomentFilter}
             selectedSong={selectedSong}
-            setSelectedSongId={setSelectedSongId}
+            setSelectedSongId={selectSong}
             activeSet={activeSet}
             pendingAddSectionId={pendingAddSectionId}
             focusPulse={libraryFocusPulse}
@@ -446,20 +583,22 @@ export function Dashboard() {
           <aside className="panel library-list-panel">
             <h2>Biblioteca</h2>
             <div className="actions">
-              <button onClick={() => {
+              <button disabled={editingSong} onClick={() => {
                 const song = makeSong("Nueva cancion", "[Verso 1]\n\nPega aqui la letra");
                 setSongs([song, ...songs]);
                 setSelectedSongId(song.id);
                 setEditingSong(true);
               }}>Nueva canción</button>
               <button onClick={() => downloadJson(songs, `coro-cumbres-library-${new Date().toISOString().slice(0, 10)}.json`)}>Exportar</button>
-              <button onClick={() => libraryFileRef.current?.click()}>Importar Biblioteca</button>
-              <button onClick={() => setFileRef.current?.click()}>Importar Set</button>
+              <button disabled={editingSong} onClick={() => libraryFileRef.current?.click()}>Importar biblioteca JSON</button>
+              <button disabled={editingSong} onClick={importBrowser}>Recuperar biblioteca de este navegador</button>
+              <button disabled={editingSong} onClick={importBrowserSets}>Recuperar repertorios de este navegador</button>
+              <button disabled={editingSong} onClick={() => setFileRef.current?.click()}>Importar Set</button>
               <input ref={libraryFileRef} type="file" accept="application/json" hidden onChange={importLibrary} />
               <input ref={setFileRef} type="file" accept="application/json" hidden onChange={importSet} />
             </div>
             <LibraryFilters value={momentFilter} onChange={setMomentFilter} />
-            <SongList songs={filteredSongs} selectedId={selectedSong?.id ?? null} onSelect={setSelectedSongId} onAdd={addSongFromLibrary} onMouseDragStart={setDragSongId} />
+            <SongList songs={filteredSongs} selectedId={selectedSong?.id ?? null} onSelect={selectSong} onAdd={addSongFromLibrary} onMouseDragStart={setDragSongId} />
           </aside>
           <SongWorkspace
             song={selectedSong}
@@ -472,14 +611,11 @@ export function Dashboard() {
             showChords={previewShowChords}
             setShowChords={setPreviewShowChords}
             onDelete={deleteSong}
-            onSave={(updated) => {
-              setSongs(songs.some((song) => song.id === updated.id) ? songs.map((song) => (song.id === updated.id ? updated : song)) : [updated, ...songs]);
-              setSelectedSongId(updated.id);
-              setEditingSong(false);
-            }}
+            onSave={persistSong}
           />
         </section>
       )}
+      </fieldset>
     </main>
   );
 }
@@ -504,9 +640,9 @@ function SetSidebar(props: {
   return (
     <aside className="set-sidebar">
       <div className="sidebar-header">
-        <h2>Sets</h2>
+        <h2>Playlists</h2>
         <div className="create-set">
-          <button className="primary compact-button" onClick={() => props.setShowCreateMenu(!props.showCreateMenu)}>+ Nuevo Set</button>
+          <button className="primary compact-button" onClick={() => props.setShowCreateMenu(!props.showCreateMenu)}>+ Nuevo repertorio</button>
           {props.showCreateMenu ? (
             <div className="create-menu">
               <button onClick={() => props.addSet("playlist")}>Playlist</button>
@@ -590,7 +726,7 @@ function LibraryPane(props, ref) {
           {targetSection ? `Agregar a ${targetSection.label}` : props.activeSet.type === "playlist" ? "Agregar al final de la playlist" : "Elige una canción y selecciona el momento"}
         </div>
       ) : null}
-      <input ref={searchRef} value={props.query} onChange={(event) => props.setQuery(event.target.value)} placeholder="Buscar canción" />
+      <input ref={searchRef} value={props.query} onChange={(event) => props.setQuery(event.target.value)} aria-label="Buscar canción" placeholder="Buscar canción" />
       <LibraryFilters value={props.momentFilter} onChange={props.setMomentFilter} />
       <SongList
         songs={props.songs}
@@ -642,7 +778,7 @@ function SetWorkspace(props: {
           </div>
           <div className="actions">
             <button className="accent" onClick={() => props.requestAddSong(props.set.type === "playlist" ? sections[0]?.id ?? null : "choose")}>+ Canción</button>
-            <button onClick={() => props.exportSet(props.set)}>Compartir</button>
+            <button onClick={() => props.exportSet(props.set)}>Exportar JSON</button>
             <button onClick={() => props.duplicateSet(props.set.id)}>Duplicar</button>
             <details className="workspace-actions-menu">
               <summary aria-label="Mas acciones">•••</summary>
@@ -861,7 +997,7 @@ function SongWorkspace(props: {
   showChords: boolean;
   setShowChords: (value: boolean) => void;
   onDelete: (song: Song) => void;
-  onSave: (song: Song) => void;
+  onSave: (song: Song, expectedUpdatedAt: string) => void;
 }) {
   const song = props.song;
   const hasChords = songHasChords(song);
@@ -899,7 +1035,7 @@ function SongWorkspace(props: {
       </div>
 
       {props.editing ? (
-        <SongEditor song={song} onSave={props.onSave} onCancel={() => props.setEditing(false)} />
+        <SongEditor key={song.id} song={song} onSave={props.onSave} onCancel={() => props.setEditing(false)} />
       ) : (
         <>
           <div className="song-toolbar">
@@ -929,7 +1065,7 @@ function SongWorkspace(props: {
   );
 }
 
-export function LibrarySongRender({ song, showChords }: { song: Song; showChords: boolean }) {
+function LibrarySongRender({ song, showChords }: { song: Song; showChords: boolean }) {
   if (!showChords) {
     return <pre className="library-lyrics-only">{songToFullLyrics(song)}</pre>;
   }
@@ -967,10 +1103,25 @@ function renderChordRow(lyrics: string, chords: Array<{ symbol: string; position
   return chars.join("").trimEnd();
 }
 
-export function SongEditor({ song, onSave, onCancel }: { song: Song; onSave: (song: Song) => void; onCancel: () => void }) {
-  const [title, setTitle] = useState(song.title);
-  const [lyrics, setLyrics] = useState(sectionsToText(song.sections));
-  const [moments, setMoments] = useState<LiturgicalMoment[]>(song.liturgicalMoments ?? []);
+function SongEditor({ song, onSave, onCancel }: { song: Song; onSave: (song: Song, expectedUpdatedAt: string) => void; onCancel: () => void }) {
+  const [original] = useState(song);
+  const [title, setTitle] = useState(original.title);
+  const [lyrics, setLyrics] = useState(() => sectionsToText(original.sections));
+  const [moments, setMoments] = useState<LiturgicalMoment[]>(original.liturgicalMoments ?? []);
+  const [editorError, setEditorError] = useState("");
+
+  function saveDraft() {
+    try {
+      const updated = buildEditedSong(original, { title, lyrics, liturgicalMoments: moments }, nowIso());
+      setEditorError("");
+      onSave(updated, original.updatedAt);
+    } catch (error) { setEditorError(error instanceof Error ? error.message : "No se pudo validar la canción."); }
+  }
+
+  function formatLyrics() {
+    try { setLyrics(sectionsToText(editedSongSections(original, lyrics))); setEditorError(""); }
+    catch (error) { setEditorError(error instanceof Error ? error.message : "No se pudo validar la canción."); }
+  }
 
   function toggleMoment(moment: LiturgicalMoment) {
     setMoments((current) => current.includes(moment) ? current.filter((item) => item !== moment) : [...current, moment]);
@@ -978,7 +1129,7 @@ export function SongEditor({ song, onSave, onCancel }: { song: Song; onSave: (so
 
   return (
     <div className="editor song-editor-full">
-      <label className="editor-field">Título<input aria-label="Título de la canción" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Título" /></label>
+      <input aria-label="Título de la canción" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Titulo" />
       <div>
         <p className="muted">Momento de la Misa</p>
         <div className="filter-chips">
@@ -989,10 +1140,11 @@ export function SongEditor({ song, onSave, onCancel }: { song: Song; onSave: (so
           ))}
         </div>
       </div>
-      <label className="editor-field">Letra y acordes<textarea aria-label="Letra y acordes" value={lyrics} onChange={(event) => setLyrics(event.target.value)} /></label>
+      {editorError ? <p role="alert" className="cloud-error">{editorError}</p> : null}
+      <textarea aria-label="Letra y acordes de la canción" value={lyrics} onChange={(event) => setLyrics(event.target.value)} />
       <div className="actions">
-        <button onClick={() => setLyrics(sectionsToText(textToSections(lyrics)))}>Auto Format</button>
-        <button className="primary" onClick={() => onSave({ ...song, title: title.trim() || "Sin titulo", liturgicalMoments: moments, sections: textToSections(lyrics), updatedAt: nowIso() })}>Guardar</button>
+        <button onClick={formatLyrics}>Auto Format</button>
+        <button className="primary" onClick={saveDraft}>Guardar</button>
         <button onClick={onCancel}>Cancelar</button>
       </div>
       <p className="muted">Usa encabezados como [Verso 1], [Coro] y separa bloques con lineas en blanco. Display mostrara la cancion completa.</p>

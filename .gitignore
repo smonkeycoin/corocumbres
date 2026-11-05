@@ -21,6 +21,14 @@ dist/
 *.log
 
 # TypeScript incremental cache
-tsconfig.tsbuildinfo
+*.tsbuildinfo
 .vercel
 .env*
+
+# Public configuration template
+!.env.example
+# Local database/cache artifacts
+supabase/.temp/
+
+
+node_modules

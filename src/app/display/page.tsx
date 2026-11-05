@@ -1,11 +1,17 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAdminSession } from "@/lib/server/auth";
-import { readWorkspace } from "@/lib/server/workspace";
-import { Display } from "@/components/PresenterViews";
+import { CloudPresenter } from "@/components/CloudPresenter";
+import { getAdminAccess } from "@/lib/supabase/auth";
+
 export const dynamic = "force-dynamic";
-export const metadata = { robots: { index: false, follow: false } };
+
+export const metadata: Metadata = {
+  title: { absolute: "Display" },
+  robots: { index: false, follow: false }
+};
+
 export default async function Page() {
- if (!await getAdminSession()) redirect("/login");
- const {state}=await readWorkspace();
- return <Display initialSongs={state.songs}/>;
+  const access = await getAdminAccess();
+  if (access.status !== "admin") redirect("/login?next=/display");
+  return <CloudPresenter display />;
 }
