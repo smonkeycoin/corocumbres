@@ -61,3 +61,32 @@ La prueba reemplaza únicamente las tablas mínimas de Supabase Auth y la extrac
 Antes de producción también deben ejecutarse los advisors de seguridad y rendimiento en el proyecto correcto y verificarse los permisos del esquema expuesto en la Data API. No se ejecutaron advisors remotos sobre otros proyectos.
 
 Referencias: [identidades de Supabase](https://supabase.com/docs/guides/auth/identities), [sesiones y revocación](https://supabase.com/docs/guides/auth/sessions), [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [seguridad de la Data API](https://supabase.com/docs/guides/api/securing-your-api).
+
+## Verificación del proyecto real
+
+El 5 de noviembre de 2026 se aplicaron ambas migraciones al proyecto CORO CUMBRES `zxrbyhtzurnlrrdaupyf`. Se importaron y verificaron por lectura posterior 26 canciones, conservando todos sus identificadores, campos y timestamps. No se publicaron playlists. La revisión posterior encontró 26 canciones, 0 playlists, 4 misas y ninguna advertencia o error en los advisors de seguridad/rendimiento.
+
+La segunda migración separa los permisos de escritura y combina las condiciones de lectura por rol. Mantiene el acceso anónimo exclusivamente público, incluso si se examinan las políticas con claims sintéticos en SQL. Las 83 aserciones locales pasan con ambas migraciones.
+
+La prueba HTTP usa exclusivamente la clave pública y requiere una referencia explícita:
+
+```sh
+node --env-file=.env.local supabase/tests/smoke-rest.mjs \
+  --project-ref zxrbyhtzurnlrrdaupyf \
+  --expect-private-library --check-denials
+```
+
+`--expect-private-library` corresponde al estado inicial sin publicaciones; no debe utilizarse para afirmar que una biblioteca publicada es privada. `--check-denials` verifica que las escrituras anónimas sean rechazadas mediante filtros `id IS NULL`; las claves primarias no permiten nulos, por lo que estas solicitudes no pueden modificar filas aunque hubiese un defecto de permisos. La prueba pasó contra el proyecto real después de ambas migraciones.
+
+`tests/live-rls-rollback.sql` contiene 29 verificaciones adicionales para el esquema Auth real. Debe revisarse y enviarse íntegramente en una sola conexión: abre una transacción y termina con `ROLLBACK`. No usa endpoints Auth ni envía correos. Aborta si alguno de los administradores reales ya existe; sus identidades temporales nunca deben sustituir un inicio de sesión real. Después de ejecutarlo hay que comprobar que no queden usuarios `c0800000-*`, canciones `__coro_rls_*` ni esquema `coro_live_check`. Estas pruebas de base de datos no sustituyen la verificación OAuth con las dos cuentas reales.
+
+El fixture se ejecutó contra `zxrbyhtzurnlrrdaupyf` y aprobó las 29 aserciones. La comprobación independiente posterior, a las **22:47:26 UTC del 5 de noviembre de 2026**, confirmó cero usuarios, identidades, sesiones, membresías, canciones, playlists, ítems o esquemas de prueba. Los conteos persistentes permanecieron en **26 canciones, 0 playlists y 4 misas**; Auth tenía 0 usuarios, 0 identidades y 0 sesiones. No se llamó ningún endpoint OAuth ni se enviaron correos.
+
+La primera ejecución se revirtió al detectar una diferencia entre motores en el código del rechazo de clave foránea. La aserción acepta ahora únicamente los dos códigos equivalentes (`23503` en Supabase y `23001` en PGlite); las demás expectativas siguen siendo estrictas. Se verificó la limpieza antes de repetir. La evidencia final y la consulta de limpieza se guardaron con permisos `0600` en el respaldo privado, en `live-rls-rollback-final-evidence.json` y `live-rls-final-cleanup.json`.
+
+Para operaciones CLI usa explícitamente el archivo del perfil CORO y la referencia del proyecto. En la versión instalada, el nombre corto del perfil no basta:
+
+```sh
+supabase --profile /Users/smonkeycoin/.supabase/profiles/corocumbres.yaml \
+  db advisors --linked --project-ref zxrbyhtzurnlrrdaupyf --type all --level warn
+```
